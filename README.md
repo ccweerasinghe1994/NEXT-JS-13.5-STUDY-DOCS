@@ -10,7 +10,9 @@
     - [Tailwind CSS Setup ✅](#tailwind-css-setup-)
     - [Code Architecture ✅](#code-architecture-)
   - [Next\_js Routing  🔲](#next_js-routing--)
-    - [01\_What is Next.js Routing\_ 🔲](#01_what-is-nextjs-routing_-)
+    - [What is Next.js Routing ✅](#what-is-nextjs-routing-)
+      - [dynamic routes ✅](#dynamic-routes-)
+      - [enclosed routes ✅](#enclosed-routes-)
     - [02\_Creating Routes for DevFlow 🔲](#02_creating-routes-for-devflow-)
   - [Next.js Architecture 🔲](#nextjs-architecture-)
     - [01\_Client vs. Server Paradigm  🔲](#01_client-vs-server-paradigm--)
@@ -608,7 +610,65 @@ output
 ![Alt text](image-11.png)
 
 ## Next_js Routing  🔲
-### 01_What is Next.js Routing_ 🔲
+### What is Next.js Routing ✅
+![Alt text](image-12.png)
+![Alt text](image-13.png)
+![Alt text](image-14.png)
+![Alt text](image-15.png)
+let's build a simple app with next js
+
+![Alt text](image-16.png)
+let's build a simple navbar component
+
+![Alt text](image-17.png)
+
+and call it inside the layout
+
+![Alt text](image-18.png)
+
+let's create the about page
+
+![Alt text](image-19.png)
+
+let's create the contact page
+
+![Alt text](image-20.png)
+
+nested route
+
+![Alt text](image-21.png)
+
+add this to app page
+
+![Alt text](image-22.png)
+
+![Alt text](image-23.png)
+
+#### dynamic routes ✅
+ 
+![Alt text](image-24.png)
+
+![Alt text](image-25.png)
+
+![Alt text](image-26.png)
+
+#### enclosed routes ✅
+
+![Alt text](image-27.png)
+
+![Alt text](image-28.png)
+
+question 
+
+![Alt text](image-29.png) 🔲
+
+![Alt text](image-30.png)
+
+![Alt text](image-31.png)
+
+![Alt text](image-32.png)
+
+
 ### 02_Creating Routes for DevFlow 🔲
 ## Next.js Architecture 🔲
 ### 01_Client vs. Server Paradigm  🔲
