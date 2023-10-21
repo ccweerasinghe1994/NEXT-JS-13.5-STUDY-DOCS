@@ -6,7 +6,7 @@
     - [Eslint Prettier Setup 🔲](#eslint-prettier-setup-)
       - [Install Prettier](#install-prettier)
       - [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
-    - [Git-Github Setup 🔲](#git-github-setup-)
+    - [Git-Github Setup ✅](#git-github-setup-)
     - [Tailwind CSS Setup 🔲](#tailwind-css-setup-)
     - [Code Architecture 🔲](#code-architecture-)
     - [](#)
@@ -131,7 +131,10 @@ final result
 }
 
 ```
-### Git-Github Setup 🔲
+### Git-Github Setup ✅
+create a new repo on github
+
+
 ### Tailwind CSS Setup 🔲
 ### Code Architecture 🔲
 
