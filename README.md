@@ -14,9 +14,10 @@
       - [dynamic routes ✅](#dynamic-routes-)
       - [enclosed routes ✅](#enclosed-routes-)
     - [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
-  - [Next.js Architecture 🔲](#nextjs-architecture-)
-    - [01\_Client vs. Server Paradigm  🔲](#01_client-vs-server-paradigm--)
-    - [02\_Different Rendering Strategies 🔲](#02_different-rendering-strategies-)
+  - [Next.js Architecture ✅](#nextjs-architecture-)
+    - [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
+      - [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
+    - [Different Rendering Strategies ✅](#different-rendering-strategies-)
   - [Authentication 🔲](#authentication-)
     - [01\_The Modern Auth Service 🔲](#01_the-modern-auth-service-)
     - [02\_Setup Auth for DevFlow 🔲](#02_setup-auth-for-devflow-)
@@ -708,9 +709,231 @@ const Home = () => {
 export default Home;
 
 ```
-## Next.js Architecture 🔲
-### 01_Client vs. Server Paradigm  🔲
-### 02_Different Rendering Strategies 🔲
+## Next.js Architecture ✅
+### 01_Client vs. Server Paradigm  ✅
+![Alt text](image-36.png)
+
+![Alt text](image-37.png)
+
+both of them are react components
+
+but the difference is where they are rendered
+client side components are rendered on the client
+![Alt text](image-38.png)
+client
+![Alt text](image-39.png)
+
+server side components are rendered on the server
+![Alt text](image-40.png)
+
+by rendering on the server we can get the following benefits
+
+rendering on the server is faster
+reduce the initial load time
+better SEO
+reduce the initial bundle size
+
+![Alt text](image-41.png)
+
+![Alt text](image-42.png)
+
+![Alt text](image-43.png)
+
+#### benefits of SSR(Server Side Rendering) ✅
+
+![Alt text](image-44.png)
+because we are returning the html from the server
+
+![Alt text](image-45.png)
+
+because we are sending html instead of js like in react SEO is better
+
+![Alt text](image-46.png)
+
+![Alt text](image-47.png)
+
+when to decide to use SSR
+- when you need better SEO
+- when you need better performance
+- when you need better initial load time
+- when you need better initial bundle size
+- when you need better user experience
+- when you need better accessibility
+- when you need better security 
+  
+![Alt text](image-48.png)
+
+![Alt text](image-49.png)
+
+![Alt text](image-50.png)
+
+if a component need user data we can't render it on the server
+
+![Alt text](image-51.png)
+
+examples
+
+![Alt text](image-52.png)
+
+we use 
+
+![Alt text](image-53.png)
+
+![Alt text](image-54.png)
+
+![Alt text](image-55.png)
+
+![Alt text](image-56.png)
+
+![Alt text](image-57.png)
+
+![Alt text](image-58.png)
+
+app router consider all components as server side components
+
+![Alt text](image-59.png)
+![Alt text](image-60.png)
+
+to define a component as client side component we use
+
+![Alt text](image-61.png)
+
+
+example code 
+
+![Alt text](image-64.png)
+
+ExampleServer.tsx
+```tsx
+const ExampleServer = () => {
+    console.log("I am a server side component")
+    return (
+        <div>
+        <h1>Example Server</h1>
+        </div>
+    );
+}
+
+export default ExampleServer;
+```
+
+ExampleClient.tsx
+```tsx
+
+"use client";
+const ExampleClient = () => {
+    console.log("I am a clinet side component")
+    return (
+        <div>
+        <h1>Example Client</h1>
+        </div>
+    )
+}
+
+export default ExampleClient;
+```
+on the server
+
+![Alt text](image-65.png)
+
+on the client
+
+![Alt text](image-66.png)
+
+why are we seeing the client side component on the server
+
+
+
+![Alt text](image-62.png)
+
+![Alt text](image-63.png)
+
+also nextjs pre-render the page on the server to make it faster
+
+![Alt text](image-67.png)
+default 
+
+![Alt text](image-68.png)
+
+next will try to rerender components on the server
+
+![Alt text](image-69.png)
+
+![Alt text](image-70.png)
+
+do not include server components inside the client components
+- it will become a client component
+
+
+quiz 
+add the use client to the app component
+
+![Alt text](image-74.png)
+
+![Alt text](image-71.png)
+
+![Alt text](image-72.png)
+
+![Alt text](image-73.png)
+
+### Different Rendering Strategies ✅
+
+![Alt text](image-75.png)
+
+![Alt text](image-76.png)
+
+![Alt text](image-77.png) 
+
+we can render our code on two environments
+
+- server
+- client
+
+![Alt text](image-78.png)
+
+![Alt text](image-79.png)
+
+![Alt text](image-80.png)
+
+![Alt text](image-81.png)
+
+build time
+
+![Alt text](image-82.png)
+
+run time
+
+![Alt text](image-83.png)
+
+![Alt text](image-84.png)
+
+![Alt text](image-85.png)
+
+![Alt text](image-86.png)
+
+![Alt text](image-87.png)
+
+![Alt text](image-88.png)
+
+![Alt text](image-89.png)
+
+![Alt text](image-90.png)
+
+![Alt text](image-91.png)
+
+![Alt text](image-92.png)
+
+![Alt text](image-93.png)
+
+![Alt text](image-94.png)
+
+quiz
+![Alt text](image-95.png)
+![Alt text](image-96.png)
+![Alt text](image-97.png)
+![Alt text](image-98.png)
+![Alt text](image-99.png)
+![Alt text](image-100.png)
 ## Authentication 🔲
 ### 01_The Modern Auth Service 🔲
 ### 02_Setup Auth for DevFlow 🔲
