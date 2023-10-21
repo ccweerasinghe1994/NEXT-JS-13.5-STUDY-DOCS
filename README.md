@@ -9,11 +9,11 @@
     - [Git-Github Setup ✅](#git-github-setup-)
     - [Tailwind CSS Setup ✅](#tailwind-css-setup-)
     - [Code Architecture ✅](#code-architecture-)
-  - [Next\_js Routing  🔲](#next_js-routing--)
+  - [Next\_js Routing  ✅](#next_js-routing--)
     - [What is Next.js Routing ✅](#what-is-nextjs-routing-)
       - [dynamic routes ✅](#dynamic-routes-)
       - [enclosed routes ✅](#enclosed-routes-)
-    - [02\_Creating Routes for DevFlow 🔲](#02_creating-routes-for-devflow-)
+    - [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
   - [Next.js Architecture 🔲](#nextjs-architecture-)
     - [01\_Client vs. Server Paradigm  🔲](#01_client-vs-server-paradigm--)
     - [02\_Different Rendering Strategies 🔲](#02_different-rendering-strategies-)
@@ -609,7 +609,7 @@ output
 
 ![Alt text](image-11.png)
 
-## Next_js Routing  🔲
+## Next_js Routing  ✅
 ### What is Next.js Routing ✅
 ![Alt text](image-12.png)
 ![Alt text](image-13.png)
@@ -660,7 +660,7 @@ add this to app page
 
 question 
 
-![Alt text](image-29.png) 🔲
+![Alt text](image-29.png) 
 
 ![Alt text](image-30.png)
 
@@ -669,7 +669,45 @@ question
 ![Alt text](image-32.png)
 
 
-### 02_Creating Routes for DevFlow 🔲
+### Creating Routes for DevFlow ✅
+
+let's create the routes for our app
+
+![Alt text](image-34.png)
+
+in the (auth) folder let's create a layout component
+
+```tsx
+import { FC, ReactNode } from 'react';
+
+type TLayoutProps = {
+	children: ReactNode;
+};
+const Layout: FC<TLayoutProps> = ({ children }) => {
+	return (
+		<main className="flex min-h-screen w-full items-center justify-center">
+			{children}
+		</main>
+	);
+};
+
+export default Layout;
+
+```
+and delete the root `page.tsx` from root
+
+this is the default root now
+
+![Alt text](image-35.png)
+
+```tsx
+const Home = () => {
+	return <div>Home</div>;
+};
+
+export default Home;
+
+```
 ## Next.js Architecture 🔲
 ### 01_Client vs. Server Paradigm  🔲
 ### 02_Different Rendering Strategies 🔲
