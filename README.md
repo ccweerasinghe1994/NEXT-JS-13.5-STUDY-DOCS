@@ -3,19 +3,76 @@
 - [NEXT JS STUDY DOCS](#next-js-study-docs)
   - [Setup ✅](#setup-)
     - [DevFlow Project Setup ✅](#devflow-project-setup-)
-    - [Eslint Prettier Setup 🔲](#eslint-prettier-setup-)
+    - [Eslint Prettier Setup ✅](#eslint-prettier-setup-)
       - [Install Prettier](#install-prettier)
       - [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
     - [Git-Github Setup ✅](#git-github-setup-)
     - [Tailwind CSS Setup ✅](#tailwind-css-setup-)
     - [Code Architecture ✅](#code-architecture-)
+  - [Next\_js Routing  🔲](#next_js-routing--)
+    - [01\_What is Next.js Routing\_ 🔲](#01_what-is-nextjs-routing_-)
+    - [02\_Creating Routes for DevFlow 🔲](#02_creating-routes-for-devflow-)
+  - [Next.js Architecture 🔲](#nextjs-architecture-)
+    - [01\_Client vs. Server Paradigm  🔲](#01_client-vs-server-paradigm--)
+    - [02\_Different Rendering Strategies 🔲](#02_different-rendering-strategies-)
+  - [Authentication 🔲](#authentication-)
+    - [01\_The Modern Auth Service 🔲](#01_the-modern-auth-service-)
+    - [02\_Setup Auth for DevFlow 🔲](#02_setup-auth-for-devflow-)
+  - [Layouts 🔲](#layouts-)
+    - [01\_Creating Layouts using Next-Font and Metadata in DevFlow 🔲](#01_creating-layouts-using-next-font-and-metadata-in-devflow-)
+  - [Theme 🔲](#theme-)
+    - [01\_Creating a Global Theme Context for DevFlow 🔲](#01_creating-a-global-theme-context-for-devflow-)
+  - [Navbar 🔲](#navbar-)
+    - [10\_Navbar 🔲](#10_navbar-)
+  - [Sidebar 🔲](#sidebar-)
+    - [11\_Sidebar 🔲](#11_sidebar-)
+  - [Home Page 🔲](#home-page-)
+    - [01\_Home Route 🔲](#01_home-route-)
+    - [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
+    - [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
+    - [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
+    - [05\_Home Filters 🔲](#05_home-filters-)
+    - [07\_Create Question Card 🔲](#07_create-question-card-)
+  - [Ask a Question Page 🔲](#ask-a-question-page-)
     - [](#)
     - [](#-1)
     - [](#-2)
     - [](#-3)
     - [](#-4)
     - [](#-5)
+  - [Develop Backend](#develop-backend)
+  - [Create a Question](#create-a-question)
+  - [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
+  - [The Webhooks](#the-webhooks)
+  - [Community Page](#community-page)
+  - [Tags Page](#tags-page)
+  - [Question Details](#question-details)
+  - [Voting](#voting)
+  - [Collections Page](#collections-page)
+  - [Views](#views)
+  - [Tag Details Page](#tag-details-page)
+  - [Profile Page](#profile-page)
+  - [Edit\_Delete User Actions](#edit_delete-user-actions)
+  - [Show Top Results](#show-top-results)
+  - [The Local Search Functionality](#the-local-search-functionality)
+  - [The Filters](#the-filters)
+  - [The Pagination](#the-pagination)
+  - [Global Search](#global-search)
+  - [Reputation](#reputation)
+  - [Badge System](#badge-system)
+  - [Generate AI Answer](#generate-ai-answer)
+  - [Loadings \_ Toasts](#loadings-_-toasts)
+  - [Meta Data](#meta-data)
+  - [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
+  - [Next.js 13.5+](#nextjs-135)
+  - [Deployment](#deployment)
     - [](#-6)
+    - [](#-7)
+    - [](#-8)
+    - [](#-9)
+    - [](#-10)
+    - [](#-11)
+    - [](#-12)
 
 
 ## Setup ✅
@@ -42,7 +99,7 @@ let's run the app
 npm run dev
 ```
 
-### Eslint Prettier Setup 🔲
+### Eslint Prettier Setup ✅
 
 ![Alt text](image-2.png)
 
@@ -550,7 +607,63 @@ output
 
 ![Alt text](image-11.png)
 
-
+## Next_js Routing  🔲
+### 01_What is Next.js Routing_ 🔲
+### 02_Creating Routes for DevFlow 🔲
+## Next.js Architecture 🔲
+### 01_Client vs. Server Paradigm  🔲
+### 02_Different Rendering Strategies 🔲
+## Authentication 🔲
+### 01_The Modern Auth Service 🔲
+### 02_Setup Auth for DevFlow 🔲
+## Layouts 🔲
+### 01_Creating Layouts using Next-Font and Metadata in DevFlow 🔲
+## Theme 🔲
+### 01_Creating a Global Theme Context for DevFlow 🔲
+## Navbar 🔲
+### 10_Navbar 🔲
+## Sidebar 🔲
+### 11_Sidebar 🔲
+## Home Page 🔲
+### 01_Home Route 🔲
+### 02_Active Lesson 3 — Create a LocalSearchbar 🔲
+### 03_LocalSearchbar Component 🔲
+### 04_Active Lesson 4 — Create a Filter 🔲
+### 05_Home Filters 🔲
+### 07_Create Question Card 🔲
+## Ask a Question Page 🔲
+### 
+### 
+### 
+### 
+### 
+### 
+## Develop Backend
+## Create a Question
+## Fetching Questions on the Home Page
+## The Webhooks
+## Community Page
+## Tags Page
+## Question Details
+## Voting
+## Collections Page
+## Views
+## Tag Details Page
+## Profile Page
+## Edit_Delete User Actions
+## Show Top Results
+## The Local Search Functionality
+## The Filters
+## The Pagination
+## Global Search
+## Reputation
+## Badge System
+## Generate AI Answer
+## Loadings _ Toasts
+## Meta Data
+## Bug Fixing and Recommendation
+## Next.js 13.5+
+## Deployment
 ### 
 ### 
 ### 
