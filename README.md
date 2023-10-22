@@ -23,14 +23,15 @@
 		- [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
 	- [Layouts ✅](#layouts-)
 		- [Creating Layouts using Next-Font and Metadata in DevFlow ✅](#creating-layouts-using-next-font-and-metadata-in-devflow-)
-	- [Theme 🔲](#theme-)
-		- [Creating a Global Theme Context for DevFlow 🔲](#creating-a-global-theme-context-for-devflow-)
-	- [Navbar 🔲](#navbar-)
+	- [Theme ✅](#theme-)
+		- [Creating a Global Theme Context for DevFlow ✅](#creating-a-global-theme-context-for-devflow-)
+	- [Navbar ✅](#navbar-)
 		- [Container and User Account ✅](#container-and-user-account-)
 		- [Shadcn Installation](#shadcn-installation)
 		- [Theme Switcher and Mobile Navigation](#theme-switcher-and-mobile-navigation)
 		- [theme switcher ✅](#theme-switcher-)
-		- [MobileNavigation](#mobilenavigation)
+		- [MobileNavigation ✅](#mobilenavigation-)
+		- [Global Search ✅](#global-search-)
 	- [Sidebar 🔲](#sidebar-)
 		- [11\_Sidebar 🔲](#11_sidebar-)
 	- [Home Page 🔲](#home-page-)
@@ -1090,8 +1091,8 @@ will customize the clerk appearance
 ![Alt text](image-109.png)
 
 
-## Theme 🔲
-### Creating a Global Theme Context for DevFlow 🔲
+## Theme ✅
+### Creating a Global Theme Context for DevFlow ✅
 
 Using React Context for State Management with Next.js https://vercel.com/guides/react-context-state-management-nextjs
 
@@ -1181,7 +1182,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }
 ```
-## Navbar 🔲
+## Navbar ✅
 
 ### Container and User Account ✅
 let's create a NavBar component
@@ -1928,7 +1929,7 @@ theme selector
 
 ![Alt text](image-116.png)
 
-### MobileNavigation
+### MobileNavigation ✅
 
 let's use sheet component from shadcn https://ui.shadcn.com/docs/components/sheet
 
@@ -2111,6 +2112,113 @@ const NavBar: FC<TNavBar> = () => {
 
 export default NavBar;
 ```
+
+output
+
+![Alt text](image-117.png)
+
+### Global Search ✅ 
+
+let's install the input component from shadcn https://ui.shadcn.com/docs/components/input
+
+```bash
+npx shadcn-ui@latest add input
+```
+
+let's create a global search component
+
+```tsx
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+
+const GlobalSearch = () => {
+  return (
+    <div className={"relative w-full max-w-[600px] max-lg:hidden"}>
+      <div className="background-light800_darkgradient relative flex min-h-[56px] grow items-center  gap-1 rounded-xl px-4">
+        <Image
+          src={"/assets/icons/search.svg"}
+          alt={"search"}
+          width={24}
+          height={24}
+          className={"cursor-pointer"}
+        />
+        <Input
+          className={
+            "paragraph-regular no-focus placeholder background-light800_darkgradient border-none shadow-none outline-none"
+          }
+          type={"text"}
+          placeholder={"Search Globally"}
+          value={""}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default GlobalSearch;
+```
+
+add it to the navBar component
+
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import Theme from "@/components/shared/navbar/Theme";
+import MobileNav from "@/components/shared/navbar/MobileNav";
+import GlobalSearch from "@/components/shared/search/GlobalSearch";
+
+type TNavBar = {};
+const NavBar: FC<TNavBar> = () => {
+  return (
+    <nav
+      className={
+        "flex-between background-light900_dark200 fixed z-50 flex w-full gap-5  p-6 shadow-light-300 dark:shadow-none sm:px-12"
+      }
+    >
+      <Link href={"/"} className={"flex items-center gap-1"}>
+        <Image
+          src={"/assets/images/site-logo.svg"}
+          width={23}
+          height={23}
+          alt={"StackFlow"}
+        />
+        <p
+          className={
+            "h2-bold font-spaceGrotesk text-dark-100 dark:text-light-900 max-sm:hidden"
+          }
+        >
+          Stack <span className={"text-primary-500"}>Flow</span>
+        </p>
+      </Link>
+      <GlobalSearch />
+      <div className={"flex-between gap-5"}>
+        <Theme />
+        <SignedIn>
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-10 w-10",
+              },
+              variables: {
+                colorPrimary: "#ff7000",
+              },
+            }}
+            afterSignOutUrl="/"
+          />
+        </SignedIn>
+        <MobileNav />
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;
+```
+![Alt text](image-118.png)
+
+![Alt text](image-119.png)
 
 
 ## Sidebar 🔲 
