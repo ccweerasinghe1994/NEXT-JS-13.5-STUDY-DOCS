@@ -954,6 +954,70 @@ let's install clerk
 ```bash
 npm install @clerk/nextjs
 ```
+![Alt text](image-104.png)
+
+![Alt text](image-105.png)
+
+let's create a middleware file in the root folder
+and make the home page public
+```ts
+import { authMiddleware } from '@clerk/nextjs';
+
+// This example protects all routes including api/trpc routes
+// Please edit this to allow other routes to be public as needed.
+// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your Middleware
+export default authMiddleware({
+	publicRoutes: ['/']
+});
+
+export const config = {
+	matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)']
+};
+```
+
+and update the layout page
+
+```tsx
+import { ClerkProvider } from '@clerk/nextjs';
+import { ReactNode } from 'react';
+
+export const metadata = {
+	title: 'Next.js 13 with Clerk'
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+	return (
+		<ClerkProvider>
+			<html lang="en">
+				<body>{children}</body>
+			</html>
+		</ClerkProvider>
+	);
+}
+```
+
+follow the steps in the docs and create sign-in and sign-up pages
+
+![Alt text](image-106.png)
+
+pages/sign-in.tsx
+```tsx
+import { SignIn } from '@clerk/nextjs';
+
+export default function Page() {
+	return <SignIn />;
+}
+```
+
+pages/sign-up.tsx
+```tsx
+import { SignUp } from '@clerk/nextjs';
+
+export default function Page() {
+	return <SignUp />;
+}
+
+```
 
 ## Layouts 🔲
 ### 01_Creating Layouts using Next-Font and Metadata in DevFlow 🔲
