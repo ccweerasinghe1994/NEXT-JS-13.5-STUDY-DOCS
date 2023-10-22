@@ -24,9 +24,12 @@
 	- [Layouts ✅](#layouts-)
 		- [Creating Layouts using Next-Font and Metadata in DevFlow ✅](#creating-layouts-using-next-font-and-metadata-in-devflow-)
 	- [Theme 🔲](#theme-)
-		- [01\_Creating a Global Theme Context for DevFlow 🔲](#01_creating-a-global-theme-context-for-devflow-)
+		- [Creating a Global Theme Context for DevFlow 🔲](#creating-a-global-theme-context-for-devflow-)
 	- [Navbar 🔲](#navbar-)
-		- [10\_Navbar 🔲](#10_navbar-)
+		- [Container and User Account ✅](#container-and-user-account-)
+		- [Shadcn Installation](#shadcn-installation)
+		- [Theme Switcher and Mobile Navigation](#theme-switcher-and-mobile-navigation)
+		- [theme switcher ✅](#theme-switcher-)
 	- [Sidebar 🔲](#sidebar-)
 		- [11\_Sidebar 🔲](#11_sidebar-)
 	- [Home Page 🔲](#home-page-)
@@ -1087,9 +1090,843 @@ will customize the clerk appearance
 
 
 ## Theme 🔲
-### 01_Creating a Global Theme Context for DevFlow 🔲
+### Creating a Global Theme Context for DevFlow 🔲
+
+Using React Context for State Management with Next.js https://vercel.com/guides/react-context-state-management-nextjs
+
+let's create a context/ThemeProvider.tsx
+
+```tsx
+"use client";
+
+import {
+  useContext,
+  createContext,
+  useState,
+  ReactNode,
+  FC,
+  useEffect,
+} from "react";
+
+type TTheme = "dark" | "light" | undefined;
+
+type TThemeContext = {
+  theme: "dark" | "light" | undefined;
+  setTheme: (theme: TTheme) => void;
+};
+
+const ThemeContext = createContext<TThemeContext | undefined>(undefined);
+
+type TThemeProvider = {
+  children: ReactNode;
+};
+export const ThemeProvider: FC<TThemeProvider> = ({ children }) => {
+  const [theme, setTheme] = useState<"dark" | "light" | undefined>(undefined);
+
+  const handleThemeChange = (theme: TTheme) => {
+    if (theme === "dark") {
+      setTheme("light");
+      document.documentElement.classList.add("dark");
+    } else {
+      setTheme("dark");
+      document.documentElement.classList.add("light");
+    }
+  };
+
+  useEffect(() => {
+    handleThemeChange(theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+};
+```
+
+let's add the theme provider to the layout
+
+```tsx
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+        <ClerkProvider
+          appearance={{
+            elements: {
+              formButtonPrimary: "primary-gradient",
+              footerActionLink: "primary-text-gradient hover:text-primary-500",
+            },
+          }}
+        >
+          <ThemeProvider>{children}</ThemeProvider>
+        </ClerkProvider>
+      </body>
+    </html>
+  );
+}
+```
 ## Navbar 🔲
-### 10_Navbar 🔲
+
+### Container and User Account ✅
+let's create a NavBar component
+
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+
+type TNavBar = {};
+const NavBar: FC<TNavBar> = () => {
+  return (
+    <nav
+      className={
+        "flex-between background-light900_dark200 fixed z-50 flex w-full gap-5  p-6 shadow-light-300 dark:shadow-none sm:px-12"
+      }
+    >
+      <Link href={"/"} className={"flex items-center gap-1"}>
+        <Image
+          src={"/assets/images/site-logo.svg"}
+          width={23}
+          height={23}
+          alt={"StackFlow"}
+        />
+        <p
+          className={
+            "h2-bold min-sm:hidden font-spaceGrotesk text-dark-100 dark:text-light-900"
+          }
+        >
+          Stack <span className={"text-primary-500"}>Flow</span>
+        </p>
+      </Link>
+      {/*  GLOBAL SEARCH COMPONENT */}
+      <div className={"flex-between gap-5"}>
+        Theme
+        <SignedIn>
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-10 w-10",
+              },
+              variables: {
+                colorPrimary: "#ff7000",
+              },
+            }}
+            afterSignOutUrl="/"
+          />
+        </SignedIn>
+        Mobile Navigation
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;
+```
+
+let's remove the user button from the some page
+
+```tsx
+export default function Home() {
+  return <div></div>;
+}
+```
+
+create a  root layout 
+```tsx
+import { FC, ReactNode } from "react";
+import NavBar from "@/components/shared/navbar/NavBar";
+
+type TLayout = {
+  children: ReactNode;
+};
+
+const Layout: FC<TLayout> = ({ children }) => {
+  return (
+    <main className={"background-light850_dark100 relative"}>
+      <NavBar />
+      <div className="flex">
+        LEFT SIDE BAR
+        <section
+          className={
+            "flex min-h-screen flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14"
+          }
+        >
+          <div className={"mx-auto w-full max-w-5xl"}>{children}</div>
+        </section>
+        Right Side Bar
+      </div>
+      Toaster
+    </main>
+  );
+};
+
+export default Layout;
+
+```
+![Alt text](image-110.png)
+
+### Shadcn Installation
+
+shadcn https://ui.shadcn.com/
+
+![Alt text](image-111.png)
+
+go to documentation
+
+https://ui.shadcn.com/docs/installation/next
+
+select next js and run the install command
+
+```bash
+npx shadcn-ui@latest init
+```
+answer the questions
+
+![Alt text](image-113.png)
+
+it will create a tailwind conifg js file and overrride the globals.css file 
+delete the tailwind config file and undo the globals.css file
+
+it will create a `lib/utils.ts` file
+```ts
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+ 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+```
+
+components.json file
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+```
+### Theme Switcher and Mobile Navigation
+
+let's add the button to the project
+
+```bash
+npx shadcn-ui@latest add button
+```
+
+let's add a menu bar to 
+
+```bash
+npx shadcn-ui@latest add menubar
+```
+
+### theme switcher ✅
+
+let's create a constants component for storing constants
+
+```tsx
+import { SidebarLink } from "@/types/types";
+
+export const THEMES = [
+  {
+    value: "light",
+    label: "Light",
+    icon: "/assets/icons/sun.svg",
+  },
+  {
+    value: "dark",
+    label: "Dark",
+    icon: "/assets/icons/moon.svg",
+  },
+  {
+    value: "system",
+    label: "System",
+    icon: "/assets/icons/computer.svg",
+  },
+];
+
+export const sidebarLinks: SidebarLink[] = [
+  {
+    imgURL: "/assets/icons/home.svg",
+    route: "/",
+    label: "Home",
+  },
+  {
+    imgURL: "/assets/icons/users.svg",
+    route: "/community",
+    label: "Community",
+  },
+  {
+    imgURL: "/assets/icons/star.svg",
+    route: "/collection",
+    label: "Collections",
+  },
+  {
+    imgURL: "/assets/icons/suitcase.svg",
+    route: "/jobs",
+    label: "Find Jobs",
+  },
+  {
+    imgURL: "/assets/icons/tag.svg",
+    route: "/tags",
+    label: "Tags",
+  },
+  {
+    imgURL: "/assets/icons/user.svg",
+    route: "/profile",
+    label: "Profile",
+  },
+  {
+    imgURL: "/assets/icons/question.svg",
+    route: "/ask-question",
+    label: "Ask a question",
+  },
+];
+
+export const BADGE_CRITERIA = {
+  QUESTION_COUNT: {
+    BRONZE: 10,
+    SILVER: 50,
+    GOLD: 100,
+  },
+  ANSWER_COUNT: {
+    BRONZE: 10,
+    SILVER: 50,
+    GOLD: 100,
+  },
+  QUESTION_UPVOTES: {
+    BRONZE: 10,
+    SILVER: 50,
+    GOLD: 100,
+  },
+  ANSWER_UPVOTES: {
+    BRONZE: 10,
+    SILVER: 50,
+    GOLD: 100,
+  },
+  TOTAL_VIEWS: {
+    BRONZE: 1000,
+    SILVER: 10000,
+    GOLD: 100000,
+  },
+};
+```
+let's create a types folder and create a types.d.ts file
+
+```ts
+import { BADGE_CRITERIA } from "@/constants";
+export interface SidebarLink {
+  imgURL: string;
+  route: string;
+  label: string;
+}
+export interface Job {
+  id?: string;
+  employer_name?: string;
+  employer_logo?: string | undefined;
+  employer_website?: string;
+  job_employment_type?: string;
+  job_title?: string;
+  job_description?: string;
+  job_apply_link?: string;
+  job_city?: string;
+  job_state?: string;
+  job_country?: string;
+}
+export interface Country {
+  name: {
+    common: string;
+  };
+}
+export interface ParamsProps {
+  params: { id: string };
+}
+export interface SearchParamsProps {
+  searchParams: { [key: string]: string | undefined };
+}
+export interface URLProps {
+  params: { id: string };
+  searchParams: { [key: string]: string | undefined };
+}
+export interface BadgeCounts {
+  GOLD: number;
+  SILVER: number;
+  BRONZE: number;
+}
+export type BadgeCriteriaType = keyof typeof BADGE_CRITERIA;
+```
+
+final code for the ThemeProvider.tsx
+
+```tsx
+"use client";
+
+import {
+  useContext,
+  createContext,
+  useState,
+  ReactNode,
+  FC,
+  useEffect,
+} from "react";
+
+export type TTheme = "dark" | "light" | undefined;
+
+type TThemeContext = {
+  theme: TTheme;
+  setTheme: (theme: TTheme) => void;
+};
+
+const ThemeContext = createContext<TThemeContext | undefined>(undefined);
+
+type TThemeProvider = {
+  children: ReactNode;
+};
+export const ThemeProvider: FC<TThemeProvider> = ({ children }) => {
+  const [theme, setTheme] = useState<"dark" | "light" | undefined>(undefined);
+
+  const handleThemeChange = () => {
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+      setTheme("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      setTheme("light");
+    }
+  };
+
+  useEffect(() => {
+    handleThemeChange();
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+};
+
+```
+small change in the tailwind
+```ts
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  darkMode: "class",
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          500: "#FF7000",
+          100: "#FFF1E6",
+        },
+        dark: {
+          100: "#000000",
+          200: "#0F1117",
+          300: "#151821",
+          400: "#212734",
+          500: "#3F4354",
+        },
+        light: {
+          900: "#FFFFFF",
+          800: "#F4F6F8",
+          850: "#FDFDFD",
+          700: "#DCE3F1",
+          500: "#7B8EC8",
+          400: "#858EAD",
+        },
+        "accent-blue": "#1DA1F2",
+      },
+      fontFamily: {
+        inter: ["var(--font-inter)"],
+        spaceGrotesk: ["var(--font-spaceGrotesk)"],
+      },
+      boxShadow: {
+        "light-100":
+          "0px 12px 20px 0px rgba(184, 184, 184, 0.03), 0px 6px 12px 0px",
+        "light-200": "10px 10px 20px 0px rgba(218, 213, 213, 0.10)",
+        "light-300": "-10px 10px 20px 0px rgba(218, 213, 213, 0.10)",
+        "dark-100": "0px 2px 10px 0px rgba(46, 52, 56, 0.10)",
+        "dark-200": "2px 0px 20px 0px rgba(39, 36, 36, 0.04)",
+      },
+      backgroundImage: {
+        "auth-dark": "url('/assets/images/auth-dark.png')",
+        "auth-light": "url('/assets/images/auth-light.png')",
+      },
+      screens: {
+        xs: "420px",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+};
+export default config;
+
+```
+
+add the globals.css file
+
+```css
+@import url('../styles/theme.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+	font-family: 'Inter', sans-serif;
+}
+@layer utilities {
+	.flex-center {
+		@apply flex justify-center items-center;
+	}
+	.flex-between {
+		@apply flex justify-between items-center;
+	}
+	.flex-start {
+		@apply flex justify-start items-center;
+	}
+	.card-wrapper {
+		@apply bg-light-900 dark:dark-gradient shadow-light-100 dar;
+	}
+	.btn {
+		@apply bg-light-800 dark:bg-dark-300 !important;
+	}
+	.btn-secondary {
+		@apply bg-light-800 dark:bg-dark-400 !important;
+	}
+	.btn-tertiary {
+		@apply bg-light-700 dark:bg-dark-300 !important;
+	}
+	.markdown {
+		@apply max-w-full prose dark:prose-p:text-light-700 dark:pros;
+	}
+	.primary-gradient {
+		background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
+	}
+	.dark-gradient {
+		background: linear-gradient(
+			232deg,
+			rgba(23, 28, 35, 0.41) 0%,
+			rgba(19, 22, 28, 0.7) 100%
+		);
+	}
+	.tab {
+		@apply min-h-full dark:bg-dark-400 bg-light-800 text-light-5;
+	}
+	.no-focus {
+		@apply focus-visible:ring-0 focus-visible:ring-transparent focus;
+	}
+}
+
+.active-theme {
+	filter: invert(53%) sepia(98%) saturate(3332%) hue-rotate(0deg)
+		brightness(104%) contrast(106%) !important;
+}
+.light-gradient {
+	background: linear-gradient(
+		132deg,
+		rgba(247, 249, 255, 0.5) 0%,
+		rgba(229, 237, 255, 0.25) 100%
+	);
+}
+.primary-text-gradient {
+	background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
+	background-clip: text;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+	width: 3px;
+	height: 3px;
+	border-radius: 2px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: #ffffff;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 50px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+/* Markdown Start */
+.markdown a {
+	color: #1da1f2;
+}
+.markdown a,
+code {
+	/* These are technically the same, but use both */
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	-ms-word-break: break-all;
+	/* This is the dangerous one in WebKit, as it breaks things whereve
+word-break: break-all;
+/* Instead use this non-standard one: */
+	word-break: break-word;
+	/* Adds a hyphen where the word breaks, if supported (No Blink) */
+	-ms-hyphens: auto;
+	-moz-hyphens: auto;
+	-webkit-hyphens: auto;
+	hyphens: auto;
+	padding: 2px;
+	color: #ff7000 !important;
+}
+.markdown pre {
+	display: grid;
+	width: 100%;
+}
+.markdown pre code {
+	width: 100%;
+	display: block;
+	overflow-x: auto;
+	color: inherit !important;
+}
+/* Markdown End */
+
+/* Clerk */
+.cl-internal-b3fm6y {
+	background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
+}
+.hash-span {
+	margin-top: -140px;
+	padding-bottom: 140px;
+	display: block;
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+```
+navBar.tsx
+
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import Theme from "@/components/shared/navbar/Theme";
+
+type TNavBar = {};
+const NavBar: FC<TNavBar> = () => {
+  return (
+    <nav
+      className={
+        "flex-between background-light900_dark200 fixed z-50 flex w-full gap-5  p-6 shadow-light-300 dark:shadow-none sm:px-12"
+      }
+    >
+      <Link href={"/"} className={"flex items-center gap-1"}>
+        <Image
+          src={"/assets/images/site-logo.svg"}
+          width={23}
+          height={23}
+          alt={"StackFlow"}
+        />
+        <p
+          className={
+            "h2-bold font-spaceGrotesk text-dark-100 dark:text-light-900 max-sm:hidden"
+          }
+        >
+          Stack <span className={"text-primary-500"}>Flow</span>
+        </p>
+      </Link>
+      {/*  GLOBAL SEARCH COMPONENT */}
+      <div className={"flex-between gap-5"}>
+        <Theme />
+        <SignedIn>
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-10 w-10",
+              },
+              variables: {
+                colorPrimary: "#ff7000",
+              },
+            }}
+            afterSignOutUrl="/"
+          />
+        </SignedIn>
+        {/* Mobile Navigation */}
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;
+```
+
+Theme.tsx
+
+```tsx
+"use client";
+import { TTheme, useTheme } from "@/context/ThemeProvider";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import Image from "next/image";
+import { THEMES } from "@/CONSTANTS";
+
+const Theme = () => {
+  const { theme: mode, setTheme } = useTheme();
+
+  return (
+    <Menubar className={"relative border-none bg-transparent shadow-none"}>
+      <MenubarMenu>
+        <MenubarTrigger
+          className={
+            "focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200"
+          }
+        >
+          {mode === "light" ? (
+            <Image
+              src={"/assets/icons/sun.svg"}
+              width={20}
+              height={20}
+              alt={"sun"}
+              className={"active-theme"}
+            />
+          ) : (
+            <Image
+              src={"/assets/icons/moon.svg"}
+              width={20}
+              height={20}
+              alt={"moon"}
+              className={"active-theme"}
+            />
+          )}
+        </MenubarTrigger>
+        <MenubarContent
+          className={
+            "absolute right-[-3rem] mt-3 min-w-[120px] rounded border py-2  dark:border-dark-400 dark:bg-dark-300"
+          }
+        >
+          {THEMES.map((theme) => (
+            <MenubarItem
+              className={
+                "flex items-center gap-4 px-2.5 py-2 dark:focus:bg-dark-400"
+              }
+              onClick={() => {
+                setTheme(theme.value as TTheme);
+                if (theme.value !== "system") {
+                  localStorage.setItem("theme", theme.value);
+                } else {
+                  localStorage.removeItem("theme");
+                }
+              }}
+              key={theme.value}
+            >
+              <Image
+                src={theme.icon}
+                height={20}
+                width={20}
+                alt={theme.value}
+                className={`${mode === theme.value ? "active-theme" : ""}`}
+              />
+              <p
+                className={`body-semibold text-light-500  ${
+                  mode === theme.value
+                    ? "text-primary-500"
+                    : "text-dark100_light900"
+                }`}
+              >
+                {theme.label}
+              </p>
+            </MenubarItem>
+          ))}
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
+  );
+};
+
+export default Theme;
+
+```
+
+light mode 
+
+![Alt text](image-114.png)
+
+dark mode
+
+![Alt text](image-115.png)
+
+theme selector
+
+![Alt text](image-116.png)
+
 ## Sidebar 🔲 
 ### 11_Sidebar 🔲
 ## Home Page 🔲
