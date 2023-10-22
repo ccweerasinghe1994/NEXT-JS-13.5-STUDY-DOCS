@@ -1,81 +1,81 @@
 # NEXT JS STUDY DOCS
 
 - [NEXT JS STUDY DOCS](#next-js-study-docs)
-  - [Setup ✅](#setup-)
-    - [DevFlow Project Setup ✅](#devflow-project-setup-)
-    - [Eslint Prettier Setup ✅](#eslint-prettier-setup-)
-      - [Install Prettier](#install-prettier)
-      - [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
-    - [Git-Github Setup ✅](#git-github-setup-)
-    - [Tailwind CSS Setup ✅](#tailwind-css-setup-)
-    - [Code Architecture ✅](#code-architecture-)
-  - [Next\_js Routing  ✅](#next_js-routing--)
-    - [What is Next.js Routing ✅](#what-is-nextjs-routing-)
-      - [dynamic routes ✅](#dynamic-routes-)
-      - [enclosed routes ✅](#enclosed-routes-)
-    - [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
-  - [Next.js Architecture ✅](#nextjs-architecture-)
-    - [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
-      - [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
-    - [Different Rendering Strategies ✅](#different-rendering-strategies-)
-  - [Authentication ✅](#authentication-)
-    - [The Modern Auth Service ✅](#the-modern-auth-service-)
-    - [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
-  - [Layouts 🔲](#layouts-)
-    - [01\_Creating Layouts using Next-Font and Metadata in DevFlow 🔲](#01_creating-layouts-using-next-font-and-metadata-in-devflow-)
-  - [Theme 🔲](#theme-)
-    - [01\_Creating a Global Theme Context for DevFlow 🔲](#01_creating-a-global-theme-context-for-devflow-)
-  - [Navbar 🔲](#navbar-)
-    - [10\_Navbar 🔲](#10_navbar-)
-  - [Sidebar 🔲](#sidebar-)
-    - [11\_Sidebar 🔲](#11_sidebar-)
-  - [Home Page 🔲](#home-page-)
-    - [01\_Home Route 🔲](#01_home-route-)
-    - [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
-    - [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
-    - [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
-    - [05\_Home Filters 🔲](#05_home-filters-)
-    - [07\_Create Question Card 🔲](#07_create-question-card-)
-  - [Ask a Question Page 🔲](#ask-a-question-page-)
-    - [](#)
-    - [](#-1)
-    - [](#-2)
-    - [](#-3)
-    - [](#-4)
-    - [](#-5)
-  - [Develop Backend](#develop-backend)
-  - [Create a Question](#create-a-question)
-  - [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
-  - [The Webhooks](#the-webhooks)
-  - [Community Page](#community-page)
-  - [Tags Page](#tags-page)
-  - [Question Details](#question-details)
-  - [Voting](#voting)
-  - [Collections Page](#collections-page)
-  - [Views](#views)
-  - [Tag Details Page](#tag-details-page)
-  - [Profile Page](#profile-page)
-  - [Edit\_Delete User Actions](#edit_delete-user-actions)
-  - [Show Top Results](#show-top-results)
-  - [The Local Search Functionality](#the-local-search-functionality)
-  - [The Filters](#the-filters)
-  - [The Pagination](#the-pagination)
-  - [Global Search](#global-search)
-  - [Reputation](#reputation)
-  - [Badge System](#badge-system)
-  - [Generate AI Answer](#generate-ai-answer)
-  - [Loadings \_ Toasts](#loadings-_-toasts)
-  - [Meta Data](#meta-data)
-  - [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
-  - [Next.js 13.5+](#nextjs-135)
-  - [Deployment](#deployment)
-    - [](#-6)
-    - [](#-7)
-    - [](#-8)
-    - [](#-9)
-    - [](#-10)
-    - [](#-11)
-    - [](#-12)
+	- [Setup ✅](#setup-)
+		- [DevFlow Project Setup ✅](#devflow-project-setup-)
+		- [Eslint Prettier Setup ✅](#eslint-prettier-setup-)
+			- [Install Prettier](#install-prettier)
+			- [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
+		- [Git-Github Setup ✅](#git-github-setup-)
+		- [Tailwind CSS Setup ✅](#tailwind-css-setup-)
+		- [Code Architecture ✅](#code-architecture-)
+	- [Next\_js Routing  ✅](#next_js-routing--)
+		- [What is Next.js Routing ✅](#what-is-nextjs-routing-)
+			- [dynamic routes ✅](#dynamic-routes-)
+			- [enclosed routes ✅](#enclosed-routes-)
+		- [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
+	- [Next.js Architecture ✅](#nextjs-architecture-)
+		- [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
+			- [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
+		- [Different Rendering Strategies ✅](#different-rendering-strategies-)
+	- [Authentication ✅](#authentication-)
+		- [The Modern Auth Service ✅](#the-modern-auth-service-)
+		- [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
+	- [Layouts ✅](#layouts-)
+		- [Creating Layouts using Next-Font and Metadata in DevFlow ✅](#creating-layouts-using-next-font-and-metadata-in-devflow-)
+	- [Theme 🔲](#theme-)
+		- [01\_Creating a Global Theme Context for DevFlow 🔲](#01_creating-a-global-theme-context-for-devflow-)
+	- [Navbar 🔲](#navbar-)
+		- [10\_Navbar 🔲](#10_navbar-)
+	- [Sidebar 🔲](#sidebar-)
+		- [11\_Sidebar 🔲](#11_sidebar-)
+	- [Home Page 🔲](#home-page-)
+		- [01\_Home Route 🔲](#01_home-route-)
+		- [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
+		- [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
+		- [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
+		- [05\_Home Filters 🔲](#05_home-filters-)
+		- [07\_Create Question Card 🔲](#07_create-question-card-)
+	- [Ask a Question Page 🔲](#ask-a-question-page-)
+		- [](#)
+		- [](#-1)
+		- [](#-2)
+		- [](#-3)
+		- [](#-4)
+		- [](#-5)
+	- [Develop Backend](#develop-backend)
+	- [Create a Question](#create-a-question)
+	- [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
+	- [The Webhooks](#the-webhooks)
+	- [Community Page](#community-page)
+	- [Tags Page](#tags-page)
+	- [Question Details](#question-details)
+	- [Voting](#voting)
+	- [Collections Page](#collections-page)
+	- [Views](#views)
+	- [Tag Details Page](#tag-details-page)
+	- [Profile Page](#profile-page)
+	- [Edit\_Delete User Actions](#edit_delete-user-actions)
+	- [Show Top Results](#show-top-results)
+	- [The Local Search Functionality](#the-local-search-functionality)
+	- [The Filters](#the-filters)
+	- [The Pagination](#the-pagination)
+	- [Global Search](#global-search)
+	- [Reputation](#reputation)
+	- [Badge System](#badge-system)
+	- [Generate AI Answer](#generate-ai-answer)
+	- [Loadings \_ Toasts](#loadings-_-toasts)
+	- [Meta Data](#meta-data)
+	- [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
+	- [Next.js 13.5+](#nextjs-135)
+	- [Deployment](#deployment)
+		- [](#-6)
+		- [](#-7)
+		- [](#-8)
+		- [](#-9)
+		- [](#-10)
+		- [](#-11)
+		- [](#-12)
 
 
 ## Setup ✅
@@ -1019,8 +1019,73 @@ export default function Page() {
 
 ```
 
-## Layouts 🔲
-### 01_Creating Layouts using Next-Font and Metadata in DevFlow 🔲
+## Layouts ✅
+### Creating Layouts using Next-Font and Metadata in DevFlow ✅
+
+let's add the public folder to the app
+
+![Alt text](image-107.png)
+
+![Alt text](image-108.png)
+
+change the layout page
+
+```tsx
+import { ClerkProvider } from '@clerk/nextjs';
+import { ReactNode } from 'react';
+import './globals.css';
+// eslint-disable-next-line camelcase
+import {Inter,Space_Grotesk} from 'next/font/google';
+
+import type {Metadata} from "next";
+const inter = Inter({
+	subsets: ['latin'],
+	weight:['100','200','300','400','500','600','700','800','900'],
+	variable:'--font-inter',
+});
+const spaceGrotesk = Space_Grotesk({
+	subsets: ['latin'],
+	weight:['300','400','500','600','700'],
+	variable:'--font-spaceGrotesk',
+});
+
+
+export const metadata:Metadata = {
+	title: 'StackFlow',
+	description:'StackFlow is a Q&A site for professional and enthusiast programmers. ' +
+		'It is built and run by you as part of the Stack Exchange network of Q&A sites. ' +
+		'With your help, we are working together to build a library of detailed answers to every question about programming.',
+	icons:{
+		icon: '/assets/images/site-logo.svg',
+	}
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+	return (
+		<ClerkProvider appearance={{
+			elements:{
+				formButtonPrimary:'primary-gradient',
+				footerActionLink:'primary-text-gradient hover:text-primary-500',
+			}
+
+		}}>
+			<html lang="en">
+				<body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+			 <h1 className="h1-bold">this is a  piece of text</h1>
+
+				{children}
+				</body>
+			</html>
+		</ClerkProvider>
+	);
+}
+```
+
+will customize the clerk appearance
+
+![Alt text](image-109.png)
+
+
 ## Theme 🔲
 ### 01_Creating a Global Theme Context for DevFlow 🔲
 ## Navbar 🔲
