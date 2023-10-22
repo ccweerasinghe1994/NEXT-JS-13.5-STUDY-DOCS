@@ -18,9 +18,9 @@
     - [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
       - [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
     - [Different Rendering Strategies ✅](#different-rendering-strategies-)
-  - [Authentication 🔲](#authentication-)
-    - [01\_The Modern Auth Service 🔲](#01_the-modern-auth-service-)
-    - [02\_Setup Auth for DevFlow 🔲](#02_setup-auth-for-devflow-)
+  - [Authentication ✅](#authentication-)
+    - [The Modern Auth Service ✅](#the-modern-auth-service-)
+    - [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
   - [Layouts 🔲](#layouts-)
     - [01\_Creating Layouts using Next-Font and Metadata in DevFlow 🔲](#01_creating-layouts-using-next-font-and-metadata-in-devflow-)
   - [Theme 🔲](#theme-)
@@ -934,16 +934,34 @@ quiz
 ![Alt text](image-98.png)
 ![Alt text](image-99.png)
 ![Alt text](image-100.png)
-## Authentication 🔲
-### 01_The Modern Auth Service 🔲
-### 02_Setup Auth for DevFlow 🔲
+
+## Authentication ✅
+
+### The Modern Auth Service ✅
+we will use clerk.dev for authentication https://clerk.com/
+![Alt text](image-103.png)
+### Setup Auth for DevFlow ✅
+we will use clerk.dev for authentication
+![Alt text](image-101.png)
+![Alt text](image-102.png)
+
+copy the keys to the `env.local` file
+
+now go to https://clerk.com/docs/quickstarts/nextjs
+
+let's install clerk
+
+```bash
+npm install @clerk/nextjs
+```
+
 ## Layouts 🔲
 ### 01_Creating Layouts using Next-Font and Metadata in DevFlow 🔲
 ## Theme 🔲
 ### 01_Creating a Global Theme Context for DevFlow 🔲
 ## Navbar 🔲
 ### 10_Navbar 🔲
-## Sidebar 🔲
+## Sidebar 🔲 
 ### 11_Sidebar 🔲
 ## Home Page 🔲
 ### 01_Home Route 🔲
