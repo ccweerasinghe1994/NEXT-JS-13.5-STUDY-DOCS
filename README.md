@@ -30,6 +30,7 @@
 		- [Shadcn Installation](#shadcn-installation)
 		- [Theme Switcher and Mobile Navigation](#theme-switcher-and-mobile-navigation)
 		- [theme switcher ✅](#theme-switcher-)
+		- [MobileNavigation](#mobilenavigation)
 	- [Sidebar 🔲](#sidebar-)
 		- [11\_Sidebar 🔲](#11_sidebar-)
 	- [Home Page 🔲](#home-page-)
@@ -1926,6 +1927,191 @@ dark mode
 theme selector
 
 ![Alt text](image-116.png)
+
+### MobileNavigation
+
+let's use sheet component from shadcn https://ui.shadcn.com/docs/components/sheet
+
+```bash
+npx shadcn-ui@latest add sheet
+```
+let's create a mobile navigation component
+
+```tsx
+"use client";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import Image from "next/image";
+import Link from "next/link";
+import { SignedOut } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { sidebarLinks } from "@/CONSTANTS";
+import { usePathname } from "next/navigation";
+
+const NavContent = () => {
+  const pathName = usePathname();
+  return (
+    <section className={"flex h-full flex-col gap-6 pt-16"}>
+      {sidebarLinks.map((link) => {
+        const isActive =
+          pathName === link.route ||
+          (pathName.includes(link.route) && link.route.length > 0);
+        return (
+          <SheetClose asChild key={link.route}>
+            <Link
+              href={link.route}
+              className={`${
+                isActive
+                  ? "primary-gradient rounded-lg text-light-900"
+                  : "text-dark300_light900"
+              } flex items-center justify-start gap-4 bg-transparent p-4`}
+            >
+              <Image
+                src={link.imgURL}
+                width={20}
+                height={20}
+                alt={link.label}
+                className={`${isActive ? "" : "invert-colors"}`}
+              />
+              <p className={`${isActive ? "base-medium" : "base-bold"}`}>
+                {link.label}
+              </p>
+            </Link>
+          </SheetClose>
+        );
+      })}
+    </section>
+  );
+};
+
+const MobileNav = () => {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Image
+          src={"/assets/icons/hamburger.svg"}
+          alt={"hamburger menue"}
+          width={36}
+          height={36}
+          className={"invert-colors sm:hidden"}
+        />
+      </SheetTrigger>
+      <SheetContent
+        side={"left"}
+        className={"background-light900_dark200 border-none"}
+      >
+        <Link href={"/"} className={"flex items-center gap-1"}>
+          <Image
+            src={"/assets/images/site-logo.svg"}
+            width={23}
+            height={23}
+            alt={"StackFlow"}
+          />
+          <p className={"h2-bold text-dark100_light900 font-spaceGrotesk"}>
+            Stack <span className={"text-primary-500"}>Flow</span>
+          </p>
+        </Link>
+        <div>
+          <SheetClose asChild>
+            <NavContent />
+          </SheetClose>
+          <SignedOut>
+            <div className={"flex flex-col gap-3"}>
+              <SheetClose>
+                <Link href={"/sign-in"}>
+                  <Button
+                    className={
+                      "small-medium btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3"
+                    }
+                  >
+                    <span className={"primary-text-gradient"}>Log In</span>
+                  </Button>
+                </Link>
+              </SheetClose>
+              <SheetClose>
+                <Link href={"/sign-up"}>
+                  <Button
+                    className={
+                      "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+                    }
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </SheetClose>
+            </div>
+          </SignedOut>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+export default MobileNav;
+```
+
+import the MobineNav component to the navBar component
+
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import Theme from "@/components/shared/navbar/Theme";
+import MobileNav from "@/components/shared/navbar/MobileNav";
+
+type TNavBar = {};
+const NavBar: FC<TNavBar> = () => {
+  return (
+    <nav
+      className={
+        "flex-between background-light900_dark200 fixed z-50 flex w-full gap-5  p-6 shadow-light-300 dark:shadow-none sm:px-12"
+      }
+    >
+      <Link href={"/"} className={"flex items-center gap-1"}>
+        <Image
+          src={"/assets/images/site-logo.svg"}
+          width={23}
+          height={23}
+          alt={"StackFlow"}
+        />
+        <p
+          className={
+            "h2-bold font-spaceGrotesk text-dark-100 dark:text-light-900 max-sm:hidden"
+          }
+        >
+          Stack <span className={"text-primary-500"}>Flow</span>
+        </p>
+      </Link>
+      {/*  GLOBAL SEARCH COMPONENT */}
+      <div className={"flex-between gap-5"}>
+        <Theme />
+        <SignedIn>
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-10 w-10",
+              },
+              variables: {
+                colorPrimary: "#ff7000",
+              },
+            }}
+            afterSignOutUrl="/"
+          />
+        </SignedIn>
+        <MobileNav />
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;
+```
+
 
 ## Sidebar 🔲 
 ### 11_Sidebar 🔲
