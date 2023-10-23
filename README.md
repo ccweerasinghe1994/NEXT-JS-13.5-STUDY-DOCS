@@ -1,86 +1,86 @@
 # NEXT JS STUDY DOCS
 
 - [NEXT JS STUDY DOCS](#next-js-study-docs)
-	- [Setup ✅](#setup-)
-		- [DevFlow Project Setup ✅](#devflow-project-setup-)
-		- [Eslint Prettier Setup ✅](#eslint-prettier-setup-)
-			- [Install Prettier](#install-prettier)
-			- [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
-		- [Git-Github Setup ✅](#git-github-setup-)
-		- [Tailwind CSS Setup ✅](#tailwind-css-setup-)
-		- [Code Architecture ✅](#code-architecture-)
-	- [Next\_js Routing  ✅](#next_js-routing--)
-		- [What is Next.js Routing ✅](#what-is-nextjs-routing-)
-			- [dynamic routes ✅](#dynamic-routes-)
-			- [enclosed routes ✅](#enclosed-routes-)
-		- [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
-	- [Next.js Architecture ✅](#nextjs-architecture-)
-		- [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
-			- [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
-		- [Different Rendering Strategies ✅](#different-rendering-strategies-)
-	- [Authentication ✅](#authentication-)
-		- [The Modern Auth Service ✅](#the-modern-auth-service-)
-		- [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
-	- [Layouts ✅](#layouts-)
-		- [Creating Layouts using Next-Font and Metadata in DevFlow ✅](#creating-layouts-using-next-font-and-metadata-in-devflow-)
-	- [Theme ✅](#theme-)
-		- [Creating a Global Theme Context for DevFlow ✅](#creating-a-global-theme-context-for-devflow-)
-	- [Navbar ✅](#navbar-)
-		- [Container and User Account ✅](#container-and-user-account-)
-		- [Shadcn Installation](#shadcn-installation)
-		- [Theme Switcher and Mobile Navigation](#theme-switcher-and-mobile-navigation)
-		- [theme switcher ✅](#theme-switcher-)
-		- [MobileNavigation ✅](#mobilenavigation-)
-		- [Global Search ✅](#global-search-)
-	- [Sidebar 🔲](#sidebar-)
-		- [11\_Sidebar 🔲](#11_sidebar-)
-	- [Home Page 🔲](#home-page-)
-		- [01\_Home Route 🔲](#01_home-route-)
-		- [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
-		- [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
-		- [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
-		- [05\_Home Filters 🔲](#05_home-filters-)
-		- [07\_Create Question Card 🔲](#07_create-question-card-)
-	- [Ask a Question Page 🔲](#ask-a-question-page-)
-		- [](#)
-		- [](#-1)
-		- [](#-2)
-		- [](#-3)
-		- [](#-4)
-		- [](#-5)
-	- [Develop Backend](#develop-backend)
-	- [Create a Question](#create-a-question)
-	- [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
-	- [The Webhooks](#the-webhooks)
-	- [Community Page](#community-page)
-	- [Tags Page](#tags-page)
-	- [Question Details](#question-details)
-	- [Voting](#voting)
-	- [Collections Page](#collections-page)
-	- [Views](#views)
-	- [Tag Details Page](#tag-details-page)
-	- [Profile Page](#profile-page)
-	- [Edit\_Delete User Actions](#edit_delete-user-actions)
-	- [Show Top Results](#show-top-results)
-	- [The Local Search Functionality](#the-local-search-functionality)
-	- [The Filters](#the-filters)
-	- [The Pagination](#the-pagination)
-	- [Global Search](#global-search)
-	- [Reputation](#reputation)
-	- [Badge System](#badge-system)
-	- [Generate AI Answer](#generate-ai-answer)
-	- [Loadings \_ Toasts](#loadings-_-toasts)
-	- [Meta Data](#meta-data)
-	- [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
-	- [Next.js 13.5+](#nextjs-135)
-	- [Deployment](#deployment)
-		- [](#-6)
-		- [](#-7)
-		- [](#-8)
-		- [](#-9)
-		- [](#-10)
-		- [](#-11)
-		- [](#-12)
+  - [Setup ✅](#setup-)
+    - [DevFlow Project Setup ✅](#devflow-project-setup-)
+    - [Eslint Prettier Setup ✅](#eslint-prettier-setup-)
+      - [Install Prettier](#install-prettier)
+      - [Setting things up for VSCode ✅](#setting-things-up-for-vscode-)
+    - [Git-Github Setup ✅](#git-github-setup-)
+    - [Tailwind CSS Setup ✅](#tailwind-css-setup-)
+    - [Code Architecture ✅](#code-architecture-)
+  - [Next\_js Routing  ✅](#next_js-routing--)
+    - [What is Next.js Routing ✅](#what-is-nextjs-routing-)
+      - [dynamic routes ✅](#dynamic-routes-)
+      - [enclosed routes ✅](#enclosed-routes-)
+    - [Creating Routes for DevFlow ✅](#creating-routes-for-devflow-)
+  - [Next.js Architecture ✅](#nextjs-architecture-)
+    - [01\_Client vs. Server Paradigm  ✅](#01_client-vs-server-paradigm--)
+      - [benefits of SSR(Server Side Rendering) ✅](#benefits-of-ssrserver-side-rendering-)
+    - [Different Rendering Strategies ✅](#different-rendering-strategies-)
+  - [Authentication ✅](#authentication-)
+    - [The Modern Auth Service ✅](#the-modern-auth-service-)
+    - [Setup Auth for DevFlow ✅](#setup-auth-for-devflow-)
+  - [Layouts ✅](#layouts-)
+    - [Creating Layouts using Next-Font and Metadata in DevFlow ✅](#creating-layouts-using-next-font-and-metadata-in-devflow-)
+  - [Theme ✅](#theme-)
+    - [Creating a Global Theme Context for DevFlow ✅](#creating-a-global-theme-context-for-devflow-)
+  - [Navbar ✅](#navbar-)
+    - [Container and User Account ✅](#container-and-user-account-)
+    - [Shadcn Installation](#shadcn-installation)
+    - [Theme Switcher and Mobile Navigation](#theme-switcher-and-mobile-navigation)
+    - [theme switcher ✅](#theme-switcher-)
+    - [MobileNavigation ✅](#mobilenavigation-)
+    - [Global Search ✅](#global-search-)
+  - [Sidebar 🔲](#sidebar-)
+    - [Sidebar ✅](#sidebar--1)
+  - [Home Page 🔲](#home-page-)
+    - [01\_Home Route 🔲](#01_home-route-)
+    - [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
+    - [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
+    - [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
+    - [05\_Home Filters 🔲](#05_home-filters-)
+    - [07\_Create Question Card 🔲](#07_create-question-card-)
+  - [Ask a Question Page 🔲](#ask-a-question-page-)
+    - [](#)
+    - [](#-1)
+    - [](#-2)
+    - [](#-3)
+    - [](#-4)
+    - [](#-5)
+  - [Develop Backend](#develop-backend)
+  - [Create a Question](#create-a-question)
+  - [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
+  - [The Webhooks](#the-webhooks)
+  - [Community Page](#community-page)
+  - [Tags Page](#tags-page)
+  - [Question Details](#question-details)
+  - [Voting](#voting)
+  - [Collections Page](#collections-page)
+  - [Views](#views)
+  - [Tag Details Page](#tag-details-page)
+  - [Profile Page](#profile-page)
+  - [Edit\_Delete User Actions](#edit_delete-user-actions)
+  - [Show Top Results](#show-top-results)
+  - [The Local Search Functionality](#the-local-search-functionality)
+  - [The Filters](#the-filters)
+  - [The Pagination](#the-pagination)
+  - [Global Search](#global-search)
+  - [Reputation](#reputation)
+  - [Badge System](#badge-system)
+  - [Generate AI Answer](#generate-ai-answer)
+  - [Loadings \_ Toasts](#loadings-_-toasts)
+  - [Meta Data](#meta-data)
+  - [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
+  - [Next.js 13.5+](#nextjs-135)
+  - [Deployment](#deployment)
+    - [](#-6)
+    - [](#-7)
+    - [](#-8)
+    - [](#-9)
+    - [](#-10)
+    - [](#-11)
+    - [](#-12)
 
 
 ## Setup ✅
@@ -2222,7 +2222,152 @@ export default NavBar;
 
 
 ## Sidebar 🔲 
-### 11_Sidebar 🔲
+### Sidebar ✅
+
+let's create a SideBar component
+```tsx
+"use client";
+import { usePathname } from "next/navigation";
+import { sidebarLinks } from "@/CONSTANTS";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+
+const SideBar = () => {
+  const pathName = usePathname();
+  return (
+    <section
+      className={
+        "background-light900_dark200 light-border custom-scrollbar sticky left-0 top-0 flex h-screen flex-col justify-between overflow-y-auto border-r p-6 pt-36 shadow-light-300 dark:shadow-none max-sm:hidden lg:w-[266px]"
+      }
+    >
+      <div className="flex flex-1 flex-col gap-6">
+        {sidebarLinks.map((link) => {
+          const isActive =
+            pathName === link.route ||
+            (pathName.includes(link.route) && link.route.length > 0);
+          return (
+            <div key={link.route}>
+              <Link
+                href={link.route}
+                className={`${
+                  isActive
+                    ? "primary-gradient rounded-lg text-light-900"
+                    : "text-dark300_light900"
+                } flex items-center justify-start gap-4 bg-transparent p-4 max-sm:justify-center max-sm:gap-0 max-sm:px-0`}
+              >
+                <Image
+                  src={link.imgURL}
+                  width={20}
+                  height={20}
+                  alt={link.label}
+                  className={`${isActive ? "" : "invert-colors"}`}
+                />
+                <p
+                  className={`${
+                    isActive ? "base-medium" : "base-bold"
+                  } max-lg:hidden`}
+                >
+                  {link.label}
+                </p>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+      <SignedIn>
+        <Button
+          className={
+            "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+          }
+        >
+          <SignOutButton>Logout</SignOutButton>
+        </Button>
+      </SignedIn>
+      <SignedOut>
+        <div className={"flex flex-col gap-3"}>
+          <Link href={"/sign-in"}>
+            <Button
+              className={
+                "small-medium btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/account.svg"}
+                alt={"account"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"primary-text-gradient max-lg:hidden"}>
+                Log In
+              </span>
+            </Button>
+          </Link>
+
+          <Link href={"/sign-up"}>
+            <Button
+              className={
+                "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/sign-up.svg"}
+                alt={"sign up"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"max-lg:hidden"}>Sign Up</span>
+            </Button>
+          </Link>
+        </div>
+      </SignedOut>
+    </section>
+  );
+};
+
+export default SideBar;
+
+```
+
+
+```tsx
+import { FC, ReactNode } from "react";
+import NavBar from "@/components/shared/navbar/NavBar";
+import SideBar from "@/components/shared/sidebar/SideBar";
+
+type TLayout = {
+  children: ReactNode;
+};
+
+const Layout: FC<TLayout> = ({ children }) => {
+  return (
+    <main className={"background-light850_dark100 relative"}>
+      <NavBar />
+      <div className="flex">
+        <SideBar />
+        <section
+          className={
+            "flex min-h-screen flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14"
+          }
+        >
+          <div className={"mx-auto w-full max-w-5xl"}>{children}</div>
+        </section>
+        Right Side Bar
+      </div>
+      Toaster
+    </main>
+  );
+};
+
+export default Layout;
+```
+
+![Alt text](image-120.png)
+
+![Alt text](image-121.png)
 ## Home Page 🔲
 ### 01_Home Route 🔲
 ### 02_Active Lesson 3 — Create a LocalSearchbar 🔲
