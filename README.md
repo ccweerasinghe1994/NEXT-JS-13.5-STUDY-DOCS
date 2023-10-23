@@ -32,8 +32,9 @@
     - [theme switcher ✅](#theme-switcher-)
     - [MobileNavigation ✅](#mobilenavigation-)
     - [Global Search ✅](#global-search-)
-  - [Sidebar 🔲](#sidebar-)
+  - [Sidebar ✅](#sidebar-)
     - [Sidebar ✅](#sidebar--1)
+    - [left Side Bar ✅](#left-side-bar-)
   - [Home Page 🔲](#home-page-)
     - [01\_Home Route 🔲](#01_home-route-)
     - [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
@@ -2221,7 +2222,7 @@ export default NavBar;
 ![Alt text](image-119.png)
 
 
-## Sidebar 🔲 
+## Sidebar ✅
 ### Sidebar ✅
 
 let's create a SideBar component
@@ -2368,6 +2369,195 @@ export default Layout;
 ![Alt text](image-120.png)
 
 ![Alt text](image-121.png)
+
+### left Side Bar ✅
+```tsx
+import { FC, ReactNode } from "react";
+import NavBar from "@/components/shared/navbar/NavBar";
+import LeftSideBar from "@/components/shared/sidebar/LeftSideBar";
+import RightSideBar from "@/components/shared/sidebar/RightSideBar";
+
+type TLayout = {
+  children: ReactNode;
+};
+
+const Layout: FC<TLayout> = ({ children }) => {
+  return (
+    <main className={"background-light850_dark100 relative"}>
+      <NavBar />
+      <div className="flex">
+        <LeftSideBar />
+        <section
+          className={
+            "flex min-h-screen flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14"
+          }
+        >
+          <div className={"mx-auto w-full max-w-5xl"}>{children}</div>
+        </section>
+        <RightSideBar />
+      </div>
+      Toaster
+    </main>
+  );
+};
+
+export default Layout;
+```
+
+RightSideBar.tsx
+
+```tsx
+"use client";
+import { usePathname } from "next/navigation";
+import { sidebarLinks } from "@/CONSTANTS";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+
+const LeftSideBar = () => {
+  const pathName = usePathname();
+  return (
+    <section
+      className={
+        "background-light900_dark200 light-border custom-scrollbar sticky left-0 top-0 flex h-screen flex-col justify-between overflow-y-auto border-r p-6 pt-36 shadow-light-300 dark:shadow-none max-sm:hidden lg:w-[266px]"
+      }
+    >
+      <div className="flex flex-1 flex-col gap-6">
+        {sidebarLinks.map((link) => {
+          const isActive =
+            pathName === link.route ||
+            (pathName.includes(link.route) && link.route.length > 0);
+          return (
+            <div key={link.route}>
+              <Link
+                href={link.route}
+                className={`${
+                  isActive
+                    ? "primary-gradient rounded-lg text-light-900"
+                    : "text-dark300_light900"
+                } flex items-center justify-start gap-4 bg-transparent p-4 max-sm:justify-center max-sm:gap-0 max-sm:px-0`}
+              >
+                <Image
+                  src={link.imgURL}
+                  width={20}
+                  height={20}
+                  alt={link.label}
+                  className={`${isActive ? "" : "invert-colors"}`}
+                />
+                <p
+                  className={`${
+                    isActive ? "base-medium" : "base-bold"
+                  } max-lg:hidden`}
+                >
+                  {link.label}
+                </p>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+      <SignedIn>
+        <Button
+          className={
+            "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+          }
+        >
+          <SignOutButton>Logout</SignOutButton>
+        </Button>
+      </SignedIn>
+      <SignedOut>
+        <div className={"flex flex-col gap-3"}>
+          <Link href={"/sign-in"}>
+            <Button
+              className={
+                "small-medium btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/account.svg"}
+                alt={"account"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"primary-text-gradient max-lg:hidden"}>
+                Log In
+              </span>
+            </Button>
+          </Link>
+
+          <Link href={"/sign-up"}>
+            <Button
+              className={
+                "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/sign-up.svg"}
+                alt={"sign up"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"max-lg:hidden"}>Sign Up</span>
+            </Button>
+          </Link>
+        </div>
+      </SignedOut>
+    </section>
+  );
+};
+
+export default LeftSideBar;
+
+```
+
+RenderTags.tsx
+
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+
+type TRenderTagsProps = {
+  _id: number;
+  name: string;
+  totalQuestions: number;
+  showCount?: boolean;
+};
+
+const RenderTags: FC<TRenderTagsProps> = ({
+  name,
+  totalQuestions,
+  showCount,
+  _id,
+}) => {
+  return (
+    <Link href={`/tags/${_id}`} className="flex justify-between gap-2">
+      <Badge
+        className={
+          "subtle-medium background-light800_dark300 rounded-md border-none px-4 py-2 uppercase text-light-400"
+        }
+      >
+        {name}
+      </Badge>
+      {showCount && (
+        <p className={"small-medium text-dark500_light700"}>{totalQuestions}</p>
+      )}
+    </Link>
+  );
+};
+
+export default RenderTags;
+```
+
+and install the badge component from shadcn https://ui.shadcn.com/docs/components/badge
+
+```bash
+npx shadcn-ui@latest add badge
+```
+
 ## Home Page 🔲
 ### 01_Home Route 🔲
 ### 02_Active Lesson 3 — Create a LocalSearchbar 🔲
