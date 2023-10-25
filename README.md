@@ -36,12 +36,11 @@
     - [Sidebar ✅](#sidebar--1)
     - [left Side Bar ✅](#left-side-bar-)
   - [Home Page 🔲](#home-page-)
-    - [01\_Home Route 🔲](#01_home-route-)
-    - [02\_Active Lesson 3 — Create a LocalSearchbar 🔲](#02_active-lesson-3--create-a-localsearchbar-)
-    - [03\_LocalSearchbar Component 🔲](#03_localsearchbar-component-)
-    - [04\_Active Lesson 4 — Create a Filter 🔲](#04_active-lesson-4--create-a-filter-)
-    - [05\_Home Filters 🔲](#05_home-filters-)
-    - [07\_Create Question Card 🔲](#07_create-question-card-)
+    - [01\_Home Route ✅](#01_home-route-)
+    - [Active Lesson 3 — Create a LocalSearch bar](#active-lesson-3--create-a-localsearch-bar)
+    - [LocalSearchbar Component ✅](#localsearchbar-component-)
+    - [Home Filters ✅](#home-filters-)
+    - [Create Question Card ✅](#create-question-card-)
   - [Ask a Question Page 🔲](#ask-a-question-page-)
     - [](#)
     - [](#-1)
@@ -2559,12 +2558,467 @@ npx shadcn-ui@latest add badge
 ```
 
 ## Home Page 🔲
-### 01_Home Route 🔲
-### 02_Active Lesson 3 — Create a LocalSearchbar 🔲
-### 03_LocalSearchbar Component 🔲
-### 04_Active Lesson 4 — Create a Filter 🔲
-### 05_Home Filters 🔲
-### 07_Create Question Card 🔲
+### 01_Home Route ✅
+let's add the top part of the home page
+![Alt text](image-122.png)
+
+```tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+export default function Home() {
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+    </>
+  );
+}
+
+```
+
+![Alt text](image-123.png)
+
+on mobile
+
+![Alt text](image-124.png)
+### Active Lesson 3 — Create a LocalSearch bar 
+let's build the search bar component
+
+![Alt text](image-125.png)
+### LocalSearchbar Component ✅
+let's create a local search bar component
+
+```tsx
+"use client";
+
+import { FC } from "react";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+
+type TLocationProps = {
+  route: string;
+  iconPosition: "left" | "right";
+  imageSrc: string;
+  placeholder: string;
+  otherClasses?: string;
+};
+
+const LocalSearch: FC<TLocationProps> = ({
+  otherClasses,
+  route,
+  imageSrc,
+  iconPosition,
+  placeholder,
+}) => {
+  return (
+    <div
+      className={`background-light800_darkgradient flex min-h-[56px] grow items-center gap-4 rounded-[10px] px-4 ${otherClasses}`}
+    >
+      {iconPosition === "left" && (
+        <Image
+          src={imageSrc}
+          alt={"search icon"}
+          width={24}
+          height={24}
+          className={"cursor-pointer"}
+        />
+      )}
+      <Input
+        type={"text"}
+        placeholder={placeholder}
+        value={""}
+        onChange={() => {}}
+        className={
+          "paragraph-regular no-focus placeholder background-light800_darkgradient border-none shadow-none outline-none"
+        }
+      />
+      {iconPosition === "right" && (
+        <Image
+          src={imageSrc}
+          alt={"search icon"}
+          width={24}
+          height={24}
+          className={"cursor-pointer"}
+        />
+      )}
+    </div>
+  );
+};
+
+export default LocalSearch;
+
+```
+light mode
+
+![Alt text](image-126.png)
+
+dark mode
+
+![Alt text](image-127.png)
+
+let's add this component to the home page
+
+```tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { HOME_PAGE_FILTERS } from "@/CONSTANTS/filters";
+import HomeFilter from "@/components/home/HomeFilter";
+
+export default function Home() {
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+      </div>
+      <HomeFilter />
+    </>
+  );
+}
+``` 
+### Home Filters ✅
+
+let's create a Filter component
+
+```tsx
+"use client";
+import { FC } from "react";
+import { TFilterItem } from "@/types/types";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type TFilterProps = {
+  filters: TFilterItem[];
+  otherClasses?: string;
+  containerClasses?: string;
+};
+
+const Filter: FC<TFilterProps> = ({
+  filters,
+  otherClasses,
+  containerClasses,
+}) => {
+  return (
+    <div className={`relative ${containerClasses}`}>
+      <Select>
+        <SelectTrigger
+          className={`${otherClasses} body-regular light-border background-light800_dark300 text-dark500_light700 border px-5 py-2.5`}
+        >
+          <div className={"line-clamp-1 flex-1 text-left"}>
+            <SelectValue placeholder="Select a Filter" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {filters.map((filter) => (
+              <SelectItem key={filter.value} value={filter.value}>
+                {filter.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
+
+export default Filter;
+```
+
+let's add this component to the home page
+
+```tsx  
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { HOME_PAGE_FILTERS } from "@/CONSTANTS/filters";
+import HomeFilter from "@/components/home/HomeFilter";
+
+export default function Home() {
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={HOME_PAGE_FILTERS}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+          containerClasses={"hidden max-md:flex"}
+        />
+      </div>
+      <HomeFilter />
+    </>
+  );
+}
+```
+
+let's create a HomeFilter component
+
+```tsx
+"use client";
+import { HOME_PAGE_FILTERS } from "@/CONSTANTS/filters";
+import { Button } from "@/components/ui/button";
+
+const HomeFilter = () => {
+  const isActive = "newest";
+  return (
+    <div className="mt-10 hidden flex-wrap gap-3 md:flex ">
+      {HOME_PAGE_FILTERS.map((filter) => (
+        <Button
+          className={`body-medium rounded-lg px-6 py-3 capitalize shadow-none ${
+            isActive === filter.value
+              ? "bg-primary-100 text-primary-500"
+              : "bg-light-800 text-light-500 hover:bg-light-900 dark:bg-dark-300 dark:text-light-500"
+          }`}
+          key={filter.value}
+          onClick={() => {}}
+        >
+          {filter.name}
+        </Button>
+      ))}
+    </div>
+  );
+};
+export default HomeFilter;
+```
+### Create Question Card ✅
+
+let's create a No Result component
+
+```tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { HOME_PAGE_FILTERS } from "@/CONSTANTS/filters";
+import HomeFilter from "@/components/home/HomeFilter";
+import NoResult from "@/components/shared/noResult/NoResult";
+
+const questions = [
+  // {
+  //   _id: 1,
+  //   title: "How to use React Query?",
+  //   tags: [
+  //     {
+  //       _id: 1,
+  //       name: "react",
+  //     },
+  //     {
+  //       _id: 2,
+  //       name: "react-query",
+  //     },
+  //   ],
+  //   author: "John Doe",
+  //   upVotes: 10,
+  //   views: 100,
+  //   answers: 2,
+  //   createdAt: "2021-09-01T12:00:00.000Z",
+  // },
+  // {
+  //   _id: 2,
+  //   title: "How to use add a new route in Next.js?",
+  //   tags: [
+  //     {
+  //       _id: 1,
+  //       name: "next.js",
+  //     },
+  //     {
+  //       _id: 2,
+  //       name: "react",
+  //     },
+  //   ],
+  //   author: "John Doe",
+  //   upVotes: 10,
+  //   views: 100,
+  //   answers: 2,
+  //   createdAt: "2021-09-01T12:00:00.000Z",
+  // },
+];
+
+export default function Home() {
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={HOME_PAGE_FILTERS}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+          containerClasses={"hidden max-md:flex"}
+        />
+      </div>
+      <HomeFilter />
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map(
+            (question) =>
+              // <QuestionCard key={question._id} question={question} />
+              " Question card",
+          )
+        ) : (
+          <NoResult
+            title={"There is no questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+```
+
+No Result component
+
+```tsx
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { FC } from "react";
+
+type TNoResultProps = {
+  title: string;
+  description: string;
+  LinkText: string;
+  LinkHref: string;
+};
+
+const NoResult: FC<TNoResultProps> = ({
+  LinkHref,
+  LinkText,
+  title,
+  description,
+}) => {
+  return (
+    <div className="mt-10 flex w-full flex-col items-center justify-center">
+      <Image
+        src={"/assets/images/light-illustration.png"}
+        alt={"no result"}
+        width={270}
+        height={200}
+        className={"block object-contain dark:hidden"}
+      />
+      <Image
+        src={"/assets/images/dark-illustration.png"}
+        alt={"no result"}
+        width={270}
+        height={200}
+        className={"hidden object-contain dark:flex"}
+      />
+      <h2 className={"h2-bold text-dark200_light900 mt-8"}>{title}</h2>
+      <p
+        className={
+          "body-regular text-dark500_light700 my-3.5 max-w-md text-center"
+        }
+      >
+        {description}
+      </p>
+      <Link href={LinkHref}>
+        <Button
+          className={
+            "paragraph-medium mt-5 min-h-[46px] rounded-lg bg-primary-500 px-4 py-3 text-light-900 "
+          }
+        >
+          {LinkText}
+        </Button>
+      </Link>
+    </div>
+  );
+};
+
+export default NoResult;
+```
+![Alt text](image-128.png)
+
+![Alt text](image-129.png)
 ## Ask a Question Page 🔲
 ### 
 ### 
