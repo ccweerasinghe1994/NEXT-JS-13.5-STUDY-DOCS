@@ -42,45 +42,45 @@
     - [Home Filters ✅](#home-filters-)
     - [Create Question Card ✅](#create-question-card-)
   - [Ask a Question Page 🔲](#ask-a-question-page-)
+    - [Question Form and Validations ✅](#question-form-and-validations-)
+    - [The Question Editor 🔲](#the-question-editor-)
+    - [Custom Multiple Tags Input 🔲](#custom-multiple-tags-input-)
+    - [Making the Form Reusable 🔲](#making-the-form-reusable-)
+  - [Develop Backend 🔲](#develop-backend-)
     - [](#)
     - [](#-1)
+  - [Create a Question 🔲](#create-a-question-)
+  - [Fetching Questions on the Home Page 🔲](#fetching-questions-on-the-home-page-)
+  - [The Webhooks 🔲](#the-webhooks-)
+  - [Community Page 🔲](#community-page-)
+  - [Tags Page 🔲](#tags-page-)
+  - [Question Details 🔲](#question-details-)
+  - [Voting 🔲](#voting-)
+  - [Collections Page 🔲](#collections-page-)
+  - [Views 🔲](#views-)
+  - [Tag Details Page 🔲](#tag-details-page-)
+  - [Profile Page 🔲](#profile-page-)
+  - [Edit\_Delete User Actions 🔲](#edit_delete-user-actions-)
+  - [Show Top Results 🔲](#show-top-results-)
+  - [The Local Search Functionality 🔲](#the-local-search-functionality-)
+  - [The Filters 🔲](#the-filters-)
+  - [The Pagination 🔲](#the-pagination-)
+  - [Global Search 🔲](#global-search--1)
+  - [Reputation 🔲](#reputation-)
+  - [Badge System 🔲](#badge-system-)
+  - [Generate AI Answer 🔲](#generate-ai-answer-)
+  - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
+  - [Meta Data 🔲](#meta-data-)
+  - [Bug Fixing and Recommendation 🔲](#bug-fixing-and-recommendation-)
+  - [Next.js 13.5+ 🔲](#nextjs-135-)
+  - [Deployment 🔲](#deployment-)
     - [](#-2)
     - [](#-3)
     - [](#-4)
     - [](#-5)
-  - [Develop Backend](#develop-backend)
-  - [Create a Question](#create-a-question)
-  - [Fetching Questions on the Home Page](#fetching-questions-on-the-home-page)
-  - [The Webhooks](#the-webhooks)
-  - [Community Page](#community-page)
-  - [Tags Page](#tags-page)
-  - [Question Details](#question-details)
-  - [Voting](#voting)
-  - [Collections Page](#collections-page)
-  - [Views](#views)
-  - [Tag Details Page](#tag-details-page)
-  - [Profile Page](#profile-page)
-  - [Edit\_Delete User Actions](#edit_delete-user-actions)
-  - [Show Top Results](#show-top-results)
-  - [The Local Search Functionality](#the-local-search-functionality)
-  - [The Filters](#the-filters)
-  - [The Pagination](#the-pagination)
-  - [Global Search](#global-search)
-  - [Reputation](#reputation)
-  - [Badge System](#badge-system)
-  - [Generate AI Answer](#generate-ai-answer)
-  - [Loadings \_ Toasts](#loadings-_-toasts)
-  - [Meta Data](#meta-data)
-  - [Bug Fixing and Recommendation](#bug-fixing-and-recommendation)
-  - [Next.js 13.5+](#nextjs-135)
-  - [Deployment](#deployment)
     - [](#-6)
     - [](#-7)
     - [](#-8)
-    - [](#-9)
-    - [](#-10)
-    - [](#-11)
-    - [](#-12)
 
 
 ## Setup ✅
@@ -3370,38 +3370,223 @@ output
 ![Alt text](image-131.png)
 
 ## Ask a Question Page 🔲
+### Question Form and Validations ✅
+let's install shadcn form component 
+```shell
+npx shadcn-ui@latest add form
+```
+
+and follow the docs https://ui.shadcn.com/docs/components/form
+![Alt text](image-132.png)
+
+in the asked question section
+```shell
+import Question from "@/components/forms/Question";
+
+const AskQuestionPage = () => {
+  return (
+    <div>
+      <h1 className="h1-bold text-dark100_light900">Ask a question</h1>
+      <div className="mt-9">
+        <Question />
+      </div>
+    </div>
+  );
+};
+
+export default AskQuestionPage;
+
+```
+
+let's create a Question component
+```tsx
+"use client";
+import { FC } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { QuestionsSchema, TQuestionsSchema } from "@/lib/validations";
+
+type TQuestionProps = {};
+
+const Question: FC<TQuestionProps> = () => {
+  const form = useForm<TQuestionsSchema>({
+    resolver: zodResolver(QuestionsSchema),
+    defaultValues: {
+      title: "",
+      explanation: "",
+      tags: [],
+    },
+  });
+
+  // 2. Define a submit handler.
+  function onSubmit(values: TQuestionsSchema) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values);
+  }
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex w-full flex-col gap-10"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem className={"flex w-full flex-col"}>
+              <FormLabel
+                className={"paragraph-semibold text-dark400_light800 "}
+              >
+                Question Title <span className={"text-primary-500"}>*</span>
+              </FormLabel>
+              <FormControl className={"mt-3.5"}>
+                <Input
+                  className={
+                    "no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
+                  }
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className={"body-regular mt-2.5 text-light-500"}>
+                Be specific and imagine you’re asking a question from another
+                person
+              </FormDescription>
+              <FormMessage className={"text-red-500"} />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="explanation"
+          render={({ field }) => (
+            <FormItem className={"flex w-full flex-col gap-3"}>
+              <FormLabel
+                className={"paragraph-semibold text-dark400_light800 "}
+              >
+                Detail explanation of your problem
+                <span className={"text-primary-500"}>*</span>
+              </FormLabel>
+              <FormControl className={"mt-3.5"}>{/*  TODO */}</FormControl>
+              <FormDescription className={"body-regular mt-2.5 text-light-500"}>
+                Introduce the problem and expand on what you want to put in the
+                title Minimum 20 characters
+              </FormDescription>
+              <FormMessage className={"text-red-500"} />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem className={"flex w-full flex-col"}>
+              <FormLabel
+                className={"paragraph-semibold text-dark400_light800 "}
+              >
+                Question Title <span className={"text-primary-500"}>*</span>
+              </FormLabel>
+              <FormControl className={"mt-3.5"}>
+                <Input
+                  className={
+                    "no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
+                  }
+                  placeholder={'Add tags (e.g. "javascript" "react")'}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className={"body-regular mt-2.5 text-light-500"}>
+                Add up to 3 tags to describe what your question is about. You
+                need to press enter to add a tag.
+              </FormDescription>
+              <FormMessage className={"text-red-500"} />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  );
+};
+
+export default Question;
+```
+
+let's add the zod validation schema
+```ts
+import * as z from "zod";
+
+export const QuestionsSchema = z.object({
+  title: z
+    .string()
+    .min(5, {
+      message: "UserName must be at least 5 characters",
+    })
+    .max(130, {
+      message: "UserName can't be more than 130 characters",
+    }),
+  explanation: z.string().min(100),
+  tags: z
+    .array(
+      z
+        .string()
+        .min(1, "tag must be at least 1 character")
+        .max(15, "cannot have more than 15 characters"),
+    )
+    .min(1, "must have at least 1 tag")
+    .max(3, "cannot have more than 3 tags"),
+});
+
+export type TQuestionsSchema = z.infer<typeof QuestionsSchema>;
+```
+
+![Alt text](image-133.png)
+![Alt text](image-134.png)
+### The Question Editor 🔲
+### Custom Multiple Tags Input 🔲
+### Making the Form Reusable 🔲
+## Develop Backend 🔲
 ### 
 ### 
-### 
-### 
-### 
-### 
-## Develop Backend
-## Create a Question
-## Fetching Questions on the Home Page
-## The Webhooks
-## Community Page
-## Tags Page
-## Question Details
-## Voting
-## Collections Page
-## Views
-## Tag Details Page
-## Profile Page
-## Edit_Delete User Actions
-## Show Top Results
-## The Local Search Functionality
-## The Filters
-## The Pagination
-## Global Search
-## Reputation
-## Badge System
-## Generate AI Answer
-## Loadings _ Toasts
-## Meta Data
-## Bug Fixing and Recommendation
-## Next.js 13.5+
-## Deployment
+## Create a Question 🔲
+## Fetching Questions on the Home Page 🔲
+## The Webhooks 🔲
+## Community Page 🔲
+## Tags Page 🔲
+## Question Details 🔲
+## Voting 🔲
+## Collections Page 🔲
+## Views 🔲
+## Tag Details Page 🔲
+## Profile Page 🔲
+## Edit_Delete User Actions 🔲
+## Show Top Results 🔲
+## The Local Search Functionality 🔲
+## The Filters 🔲
+## The Pagination 🔲
+## Global Search 🔲
+## Reputation 🔲
+## Badge System 🔲
+## Generate AI Answer 🔲
+## Loadings _ Toasts 🔲
+## Meta Data 🔲
+## Bug Fixing and Recommendation 🔲
+## Next.js 13.5+ 🔲
+## Deployment 🔲
 ### 
 ### 
 ### 
