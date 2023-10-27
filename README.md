@@ -47,8 +47,12 @@
     - [Custom Multiple Tags Input ✅](#custom-multiple-tags-input-)
     - [Making the Form Reusable ✅](#making-the-form-reusable-)
   - [Develop Backend 🔲](#develop-backend-)
-    - [](#)
-    - [](#-1)
+    - [Thinking in Backend ✅](#thinking-in-backend-)
+      - [What can I do with Next.js Server Actions?](#what-can-i-do-with-nextjs-server-actions)
+    - [MongoDB and Server Actions Setup 🔲](#mongodb-and-server-actions-setup-)
+    - [Creating Question Model 🔲](#creating-question-model-)
+    - [Creating a User Model 🔲](#creating-a-user-model-)
+    - [Creating a Tag Model 🔲](#creating-a-tag-model-)
   - [Create a Question 🔲](#create-a-question-)
   - [Fetching Questions on the Home Page 🔲](#fetching-questions-on-the-home-page-)
   - [The Webhooks 🔲](#the-webhooks-)
@@ -74,13 +78,13 @@
   - [Bug Fixing and Recommendation 🔲](#bug-fixing-and-recommendation-)
   - [Next.js 13.5+ 🔲](#nextjs-135-)
   - [Deployment 🔲](#deployment-)
+    - [](#)
+    - [](#-1)
     - [](#-2)
     - [](#-3)
     - [](#-4)
     - [](#-5)
     - [](#-6)
-    - [](#-7)
-    - [](#-8)
 
 
 ## Setup ✅
@@ -4230,9 +4234,60 @@ output
 ![Alt text](image-137.png)
 
 ![Alt text](image-138.png)
+
+
 ## Develop Backend 🔲
-### 
-### 
+### Thinking in Backend ✅
+typical app vs nextjs app
+
+![Alt text](image-139.png)
+
+we can use 
+
+![Alt text](image-140.png)
+
+One of the most exciting features is the introduction of Server Actions or Server Functions. Just like the word says, Server Actions are functions that run on the server, but that we can call from the client, just like a normal function. This is a huge step forward for Next.js, as it allows us to run code on the server without having to create an API endpoint. This is a whole new DX for Next.js developers, and it's going to be a game changer.
+
+#### What can I do with Next.js Server Actions?
+
+Server Actions are a very powerful feature, and they can be used for a lot of different use cases. Here are a few examples:
+
+- writing to a database: you can write to a database directly from the client, without having to create an API endpoint - just by defining your logic in a server action.
+- server logic: executing any server-related business logic, such as sending emails, creating files, etc.
+- calling external APIs: you can call external APIs directly from server actions, without having to create an API endpoint
+
+In summary, you can do anything you would normally do on the server, but without having to create an API endpoint.
+
+let's configure next config
+```ts
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: true,
+    mdxRs: true,
+    serverComponentsExternalPackages: ["mongoose"],
+  },
+};
+
+module.exports = nextConfig;
+```
+
+let's create a question server action
+
+![Alt text](image-141.png)
+
+```ts
+"use server";
+
+export async function createQuestion(params: any) {
+  try {
+  } catch (e) {}
+}
+```
+### MongoDB and Server Actions Setup 🔲
+### Creating Question Model 🔲
+### Creating a User Model 🔲
+### Creating a Tag Model 🔲
 ## Create a Question 🔲
 ## Fetching Questions on the Home Page 🔲
 ## The Webhooks 🔲
