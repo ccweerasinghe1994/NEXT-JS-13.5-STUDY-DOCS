@@ -55,10 +55,10 @@
     - [Creating a Tag Model ✅](#creating-a-tag-model-)
   - [Create a Question ✅](#create-a-question-)
   - [Fetching Questions on the Home Page ✅](#fetching-questions-on-the-home-page-)
-  - [The Webhooks 🔲](#the-webhooks-)
+  - [The Webhooks ✅](#the-webhooks-)
     - [Why \_ what are Webhooks ✅](#why-_-what-are-webhooks-)
     - [Implement Webhooks and User Actions ✅](#implement-webhooks-and-user-actions-)
-    - [03\_Deploy Webhooks](#03_deploy-webhooks)
+    - [Deploy Webhooks ✅](#deploy-webhooks-)
   - [Community Page 🔲](#community-page-)
   - [Tags Page 🔲](#tags-page-)
   - [Question Details 🔲](#question-details-)
@@ -5176,7 +5176,7 @@ export async function getQuestions(params: IGetQuestionsParams) {
 ```
 
 ![Alt text](image-145.png)
-## The Webhooks 🔲
+## The Webhooks ✅
 ### Why _ what are Webhooks ✅
 ![Alt text](image-146.png)
 ### Implement Webhooks and User Actions ✅
@@ -5391,7 +5391,105 @@ export const deleteUser = async (params: DeleteUserParams) => {
 };
 
 ```
-### 03_Deploy Webhooks
+### Deploy Webhooks ✅
+![Alt text](image-147.png)
+
+middleware.ts
+```ts
+import { authMiddleware } from "@clerk/nextjs";
+
+// This example protects all routes including api/trpc routes
+// Please edit this to allow other routes to be public as needed.
+// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your Middleware
+export default authMiddleware({
+  publicRoutes: [
+    "/",
+    "/api/webhook",
+    "question/:id",
+    "/tags/:id",
+    "/tags",
+    "/profile/:id",
+    "/community",
+    "/jobs",
+  ],
+  ignoredRoutes: ["/api/webhook"],
+});
+
+export const config = {
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+
+```
+
+deploy the code to vercel
+https://next-js-13-5-study-git-22thewebhooks-chamaraweerasinghe.vercel.app/
+https://next-js-13-5-study-git-22thewebhooks-chamaraweerasinghe.vercel.app/
+
+![Alt text](image-148.png)
+
+add a webhook in the clerk dashboard
+
+our app url -> https://next-js-13-5-study-git-22thewebhooks-chamaraweerasinghe.vercel.app/api/webhook
+
+![Alt text](image-149.png)
+
+![Alt text](image-150.png)
+
+![Alt text](image-151.png)
+
+![Alt text](image-152.png)
+
+removing hardcorded data
+
+```tsx
+import Question from "@/components/forms/Question";
+import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import { getUserById } from "@/lib/actions/user.action";
+
+const AskQuestionPage = async () => {
+  const { userId } = auth();
+  if (!userId) redirect("/sign-in");
+  const mongoUser = await getUserById({ userId });
+  return (
+    <div>
+      <h1 className="h1-bold text-dark100_light900">Ask a question</h1>
+      <div className="mt-9">
+        <Question mongoUserId={JSON.stringify(mongoUser._id)} />
+      </div>
+    </div>
+  );
+};
+
+export default AskQuestionPage;
+```
+
+adding image urls
+
+```ts
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    mdxRs: true,
+    serverComponentsExternalPackages: ["mongoose"],
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*",
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+    ],
+  },
+};
+
+module.exports = nextConfig;
+  
+```
 
 ## Community Page 🔲
 ## Tags Page 🔲
