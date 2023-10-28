@@ -53,7 +53,7 @@
     - [Creating Question Model 🔲](#creating-question-model-)
     - [Creating a User Model ✅](#creating-a-user-model-)
     - [Creating a Tag Model ✅](#creating-a-tag-model-)
-  - [Create a Question](#create-a-question)
+  - [Create a Question ✅](#create-a-question-)
   - [Fetching Questions on the Home Page 🔲](#fetching-questions-on-the-home-page-)
   - [The Webhooks 🔲](#the-webhooks-)
   - [Community Page 🔲](#community-page-)
@@ -4837,7 +4837,187 @@ const User = models.User || model<IUser>("User", UserSchema);
 
 export default User;
 ```
-## Create a Question
+## Create a Question ✅
+```ts
+"use server";
+
+import { connectToDatabase } from "@/lib/mogoose";
+import User, { IUser } from "@/database/user.model";
+
+type TGetUserById = {
+  userId: string;
+};
+export async function getUserById(params: TGetUserById): Promise<IUser> {
+  try {
+    const { userId } = params;
+    await connectToDatabase();
+    const user = await User.findOne({ clerkId: "123" });
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+```
+
+let's create a questio action
+
+```ts
+"use server";
+
+import { connectToDatabase } from "@/lib/mogoose";
+import Question from "@/database/question.model";
+import Tag, { ITag } from "@/database/tag.model";
+
+type TCreateQuestion = {
+  title: string;
+  content: string;
+  tags: string[];
+  author: string;
+  path: string;
+};
+export async function createQuestion(params: TCreateQuestion) {
+  try {
+    await connectToDatabase();
+    const { title, content, tags, author } = params;
+    const question = await Question.create({
+      title,
+      content,
+      author,
+    });
+
+    const tagDocuments: ITag[] = [];
+    //   create the tag document if it doesn't exist or get the existing one
+    for (const tag of tags) {
+      const existingTag: ITag = await Tag.findOneAndUpdate(
+        {
+          name: { $regex: new RegExp(`^${tag}$`, "i") },
+        },
+        {
+          $setOnInsert: {
+            name: tag,
+          },
+          $push: {
+            questions: question._id,
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+      tagDocuments.push(existingTag);
+    }
+    //   let's update the question with the tags
+    await Question.findByIdAndUpdate(question._id, {
+      $push: {
+        tags: { $each: tagDocuments },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
+
+let's get the user id from the server action
+
+```ts
+import Question from "@/components/forms/Question";
+import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import { getUserById } from "@/lib/actions/user.action";
+
+const AskQuestionPage = async () => {
+  const { userId } = auth();
+  if (!userId) redirect("/sign-in");
+  const mongoUser = await getUserById({ userId });
+  console.table(mongoUser);
+  return (
+    <div>
+      <h1 className="h1-bold text-dark100_light900">Ask a question</h1>
+      <div className="mt-9">
+        <Question mongoUserId={"653c791cc9e6e4ed1b36e755"} />
+      </div>
+    </div>
+  );
+};
+
+export default AskQuestionPage;
+```
+
+and submit form 
+
+```tsx
+"use client";
+import React, { FC, KeyboardEvent, useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ControllerRenderProps, useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { QuestionsSchema, TQuestionsSchema } from "@/lib/validations";
+import { Editor } from "@tinymce/tinymce-react";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { createQuestion } from "@/lib/actions/question.action";
+import { usePathname, useRouter } from "next/navigation";
+
+type TQuestionProps = {
+  mongoUserId: string;
+};
+
+const formType = "edit";
+
+const Question: FC<TQuestionProps> = ({ mongoUserId }) => {
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const editorRef = useRef(null);
+  const router = useRouter();
+  const pathName = usePathname();
+  const form = useForm<TQuestionsSchema>({
+    resolver: zodResolver(QuestionsSchema),
+    defaultValues: {
+      title: "",
+      explanation: "",
+      tags: [],
+    },
+  });
+  // const log = () => {
+  //   if (editorRef.current) {
+  //     console.log(editorRef.current.getContent());
+  //   }
+  // };
+  // 2. Define a submit handler.
+  async function onSubmit(values: TQuestionsSchema) {
+    setIsFormSubmitting(true);
+
+    try {
+      console.log(values);
+      console.log("mongoUserId", mongoUserId);
+      await createQuestion({
+        title: values.title,
+        content: values.explanation,
+        tags: values.tags,
+        author: JSON.parse(mongoUserId),
+        path: pathName,
+      });
+      router.push("/");
+    } catch (error) {
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  }
+```
 ## Fetching Questions on the Home Page 🔲
 ## The Webhooks 🔲
 ## Community Page 🔲
