@@ -46,14 +46,14 @@
     - [The Question Editor ✅](#the-question-editor-)
     - [Custom Multiple Tags Input ✅](#custom-multiple-tags-input-)
     - [Making the Form Reusable ✅](#making-the-form-reusable-)
-  - [Develop Backend 🔲](#develop-backend-)
+  - [Develop Backend ✅](#develop-backend-)
     - [Thinking in Backend ✅](#thinking-in-backend-)
       - [What can I do with Next.js Server Actions?](#what-can-i-do-with-nextjs-server-actions)
     - [MongoDB and Server Actions Setup ✅](#mongodb-and-server-actions-setup-)
     - [Creating Question Model 🔲](#creating-question-model-)
-    - [Creating a User Model 🔲](#creating-a-user-model-)
-    - [Creating a Tag Model 🔲](#creating-a-tag-model-)
-  - [Create a Question 🔲](#create-a-question-)
+    - [Creating a User Model ✅](#creating-a-user-model-)
+    - [Creating a Tag Model ✅](#creating-a-tag-model-)
+  - [Create a Question](#create-a-question)
   - [Fetching Questions on the Home Page 🔲](#fetching-questions-on-the-home-page-)
   - [The Webhooks 🔲](#the-webhooks-)
   - [Community Page 🔲](#community-page-)
@@ -4236,7 +4236,7 @@ output
 ![Alt text](image-138.png)
 
 
-## Develop Backend 🔲
+## Develop Backend ✅
 ### Thinking in Backend ✅
 typical app vs nextjs app
 
@@ -4678,9 +4678,166 @@ const Question =
 export default Question;
 
 ```
-### Creating a User Model 🔲
-### Creating a Tag Model 🔲
-## Create a Question 🔲
+### Creating a User Model ✅
+```ts
+import type { Document, ObjectId } from "mongoose";
+import { model, models, Schema } from "mongoose";
+
+export interface IUser extends Document {
+  clearId: string;
+  name: string;
+  username: string;
+  email: string;
+  password?: string;
+  bio?: string;
+  picture: string;
+  location?: string;
+  portfolioWebsite?: string;
+  reputation?: number;
+  saved: ObjectId[];
+  joinedAt: Date;
+}
+
+const UserSchema = new Schema<IUser>({
+  clearId: {
+    type: String,
+    require: true,
+  },
+  name: {
+    type: String,
+    require: true,
+  },
+  username: {
+    type: String,
+    require: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    require: true,
+  },
+  password: {
+    type: String,
+  },
+  bio: {
+    type: String,
+    required: false,
+  },
+  picture: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: false,
+  },
+  portfolioWebsite: {
+    type: String,
+    required: false,
+  },
+  reputation: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  saved: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Question",
+    },
+  ],
+  joinedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const User = models.User || model<IUser>("User", UserSchema);
+
+export default User;
+
+```
+### Creating a Tag Model ✅
+```ts
+import type { Document, ObjectId } from "mongoose";
+import { model, models, Schema } from "mongoose";
+
+export interface IUser extends Document {
+  clearId: string;
+  name: string;
+  username: string;
+  email: string;
+  password?: string;
+  bio?: string;
+  picture: string;
+  location?: string;
+  portfolioWebsite?: string;
+  reputation?: number;
+  saved: ObjectId[];
+  joinedAt: Date;
+}
+
+const UserSchema = new Schema<IUser>({
+  clearId: {
+    type: String,
+    require: true,
+  },
+  name: {
+    type: String,
+    require: true,
+  },
+  username: {
+    type: String,
+    require: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    require: true,
+  },
+  password: {
+    type: String,
+  },
+  bio: {
+    type: String,
+    required: false,
+  },
+  picture: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: false,
+  },
+  portfolioWebsite: {
+    type: String,
+    required: false,
+  },
+  reputation: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  saved: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Question",
+    },
+  ],
+  joinedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const User = models.User || model<IUser>("User", UserSchema);
+
+export default User;
+```
+## Create a Question
 ## Fetching Questions on the Home Page 🔲
 ## The Webhooks 🔲
 ## Community Page 🔲
