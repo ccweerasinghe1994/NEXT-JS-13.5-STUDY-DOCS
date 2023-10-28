@@ -54,8 +54,11 @@
     - [Creating a User Model ✅](#creating-a-user-model-)
     - [Creating a Tag Model ✅](#creating-a-tag-model-)
   - [Create a Question ✅](#create-a-question-)
-  - [Fetching Questions on the Home Page 🔲](#fetching-questions-on-the-home-page-)
+  - [Fetching Questions on the Home Page ✅](#fetching-questions-on-the-home-page-)
   - [The Webhooks 🔲](#the-webhooks-)
+    - [Why \_ what are Webhooks ✅](#why-_-what-are-webhooks-)
+    - [Implement Webhooks and User Actions ✅](#implement-webhooks-and-user-actions-)
+    - [03\_Deploy Webhooks](#03_deploy-webhooks)
   - [Community Page 🔲](#community-page-)
   - [Tags Page 🔲](#tags-page-)
   - [Question Details 🔲](#question-details-)
@@ -5018,8 +5021,378 @@ const Question: FC<TQuestionProps> = ({ mongoUserId }) => {
     }
   }
 ```
-## Fetching Questions on the Home Page 🔲
+## Fetching Questions on the Home Page ✅
+
+remove the hard code data
+
+```tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { HOME_PAGE_FILTERS } from "@/constants/filters";
+import HomeFilter from "@/components/home/HomeFilter";
+import NoResult from "@/components/shared/noResult/NoResult";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { getQuestions } from "@/lib/actions/question.action";
+
+export default async function Home() {
+  const { questions } = await getQuestions({});
+  console.log(questions);
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={HOME_PAGE_FILTERS}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+          containerClasses={"hidden max-md:flex"}
+        />
+      </div>
+      <HomeFilter />
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map((question) => (
+            // <QuestionCard key={question._id} question={question} />
+            <QuestionCard key={question._id} question={question} />
+          ))
+        ) : (
+          <NoResult
+            title={"There is no questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+```
+
+```ts
+"use server";
+
+import { connectToDatabase } from "@/lib/mogoose";
+import Question from "@/database/question.model";
+import Tag, { ITag } from "@/database/tag.model";
+import {
+  ICreateQuestionParams,
+  IGetQuestionsParams,
+} from "@/lib/actions/shared";
+import User from "@/database/user.model";
+import { revalidatePath } from "next/cache";
+
+export async function createQuestion(params: ICreateQuestionParams) {
+  try {
+    await connectToDatabase();
+    const { title, content, tags, author, path } = params;
+    const question = await Question.create({
+      title,
+      content,
+      author,
+    });
+
+    const tagDocuments: ITag[] = [];
+    //   create the tag document if it doesn't exist or get the existing one
+    for (const tag of tags) {
+      const existingTag: ITag = await Tag.findOneAndUpdate(
+        {
+          name: { $regex: new RegExp(`^${tag}$`, "i") },
+        },
+        {
+          $setOnInsert: {
+            name: tag,
+          },
+          $push: {
+            questions: question._id,
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+      tagDocuments.push(existingTag);
+    }
+    //   let's update the question with the tags
+    await Question.findByIdAndUpdate(question._id, {
+      $push: {
+        tags: { $each: tagDocuments },
+      },
+    });
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function getQuestions(params: IGetQuestionsParams) {
+  try {
+    await connectToDatabase();
+    const questions = await Question.find({})
+      .populate({
+        path: "tags",
+        model: Tag,
+      })
+      .populate({
+        path: "author",
+        model: User,
+      })
+      .sort({ createdAt: -1 });
+    return { questions };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+```
+
+![Alt text](image-145.png)
 ## The Webhooks 🔲
+### Why _ what are Webhooks ✅
+![Alt text](image-146.png)
+### Implement Webhooks and User Actions ✅
+
+clerk webhooks docs https://clerk.com/docs/integrations/webhooks
+
+Sync data to your backend with webhooks https://clerk.com/docs/users/sync-data 
+
+```shell
+npm install svix
+```
+
+webhook.ts
+
+```ts
+import { Webhook } from "svix";
+import { headers } from "next/headers";
+import { WebhookEvent } from "@clerk/nextjs/server";
+import { createUser, deleteUser, updateUser } from "@/lib/actions/user.action";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+
+  if (!WEBHOOK_SECRET) {
+    throw new Error(
+      "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local",
+    );
+  }
+
+  // Get the headers
+  const headerPayload = headers();
+  const svixId = headerPayload.get("svix-id");
+  const svixTimestamp = headerPayload.get("svix-timestamp");
+  const svixSignature = headerPayload.get("svix-signature");
+
+  // If there are no headers, error out
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return new Response("Error occurred -- no svix headers", {
+      status: 400,
+    });
+  }
+
+  // Get the body
+  const payload = await req.json();
+  const body = JSON.stringify(payload);
+
+  // Create a new SVIX instance with your secret.
+  const wh = new Webhook(WEBHOOK_SECRET);
+
+  let evt: WebhookEvent;
+
+  // Verify the payload with the headers
+  try {
+    evt = wh.verify(body, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    }) as WebhookEvent;
+  } catch (err) {
+    console.error("Error verifying webhook:", err);
+    return new Response("Error occurred", {
+      status: 400,
+    });
+  }
+
+  const eventType = evt.type;
+
+  if (eventType === "user.created") {
+    // eslint-disable-next-line camelcase
+    const { id, email_addresses, image_url, first_name, last_name, username } =
+      evt.data;
+    const createdData = await createUser({
+      clerkId: id,
+      // eslint-disable-next-line camelcase
+      email: email_addresses[0].email_address,
+      // eslint-disable-next-line camelcase
+      name: `${first_name} ${last_name ?? ""}`,
+      // eslint-disable-next-line camelcase
+      picture: image_url,
+      username: username ?? "USER NAME NOT FOUND",
+    });
+    return NextResponse.json({
+      message: "OK",
+      user: createdData,
+    });
+  }
+  if (eventType === "user.updated") {
+    // eslint-disable-next-line camelcase
+    const { id, email_addresses, image_url, first_name, last_name, username } =
+      evt.data;
+    const updatedUser = await updateUser({
+      clerkId: id,
+      updateData: {
+        // eslint-disable-next-line camelcase
+        email: email_addresses[0].email_address,
+        // eslint-disable-next-line camelcase
+        name: `${first_name} ${last_name ?? ""}`,
+        // eslint-disable-next-line camelcase
+        picture: image_url,
+        username: username ?? "USER NAME NOT FOUND",
+      },
+      path: `/profile/${id}`,
+    });
+    return NextResponse.json({
+      message: "OK",
+      user: updatedUser,
+    });
+  }
+
+  if (eventType === "user.deleted") {
+    // eslint-disable-next-line camelcase
+    const { id } = evt.data;
+    const deletedUser = await deleteUser({
+      clerkId: id!,
+    });
+    return NextResponse.json({
+      message: "OK",
+      user: deletedUser,
+    });
+  }
+
+  return new Response("", { status: 201 });
+}
+```
+server actions 
+```ts
+"use server";
+
+import { connectToDatabase } from "@/lib/mogoose";
+import User, { IUser } from "@/database/user.model";
+import {
+  DeleteUserParams,
+  ICreateUserParams,
+  UpdateUserParams,
+} from "@/lib/actions/shared";
+import { revalidatePath } from "next/cache";
+import Question from "@/database/question.model";
+
+type TGetUserById = {
+  userId: string;
+};
+export async function getUserById(params: TGetUserById): Promise<IUser> {
+  try {
+    const { userId } = params;
+    await connectToDatabase();
+    const user = await User.findOne({ clerkId: userId });
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function createUser(userData: ICreateUserParams): Promise<IUser> {
+  try {
+    await connectToDatabase();
+    return await User.create(userData);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export const updateUser = async (params: UpdateUserParams) => {
+  try {
+    await connectToDatabase();
+    await User.findOneAndUpdate(
+      { clerkId: params.clerkId },
+      params.updateData,
+      {
+        new: true,
+      },
+    );
+
+    revalidatePath(params.path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (params: DeleteUserParams) => {
+  try {
+    await connectToDatabase();
+    const findUser = await User.findOne({
+      clerkId: params.clerkId,
+    });
+
+    if (!findUser) {
+      throw new Error("User not found");
+    }
+
+    // delete user from database
+    // cleanup user's questions
+    // cleanup user's answers
+    // cleanup user's comments
+
+    // const userQuestions = await Question.find({
+    //   author: findUser._id,
+    // }).distinct("_id");
+
+    await Question.deleteMany({
+      author: findUser._id,
+    });
+    return await User.findByIdAndDelete(findUser._id);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+```
+### 03_Deploy Webhooks
+
 ## Community Page 🔲
 ## Tags Page 🔲
 ## Question Details 🔲
@@ -5049,3 +5422,6 @@ const Question: FC<TQuestionProps> = ({ mongoUserId }) => {
 ### 
 ### 
 ### 
+
+653c791cc9e6e4ed1b36e755
+653c791cc9e5e4ed1b36e755
