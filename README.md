@@ -4939,7 +4939,7 @@ const AskQuestionPage = async () => {
     <div>
       <h1 className="h1-bold text-dark100_light900">Ask a question</h1>
       <div className="mt-9">
-        <Question mongoUserId={"653c791cc9e6e4ed1b36e755"} />
+        <Question mongoUserId={JSON.stringify("653c791cc9e6e4ed1b36e755")} />
       </div>
     </div>
   );
