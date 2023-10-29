@@ -59,7 +59,8 @@
     - [Why \_ what are Webhooks ✅](#why-_-what-are-webhooks-)
     - [Implement Webhooks and User Actions ✅](#implement-webhooks-and-user-actions-)
     - [Deploy Webhooks ✅](#deploy-webhooks-)
-  - [Community Page 🔲](#community-page-)
+  - [Community Page ✅](#community-page-)
+    - [Create Community Page ✅](#create-community-page-)
   - [Tags Page 🔲](#tags-page-)
   - [Question Details 🔲](#question-details-)
   - [Voting 🔲](#voting-)
@@ -5491,7 +5492,185 @@ module.exports = nextConfig;
   
 ```
 
-## Community Page 🔲
+## Community Page ✅
+### Create Community Page ✅
+get all user server action
+```ts
+export const getAllUsers = async (params: GetAllUsersParams) => {
+  try {
+    const { page = 1, pageSize = 20, searchQuery, filter } = params;
+    console.log(page, pageSize, searchQuery, filter);
+    await connectToDatabase();
+    const users = await User.find({}).sort({
+      createdAt: -1,
+    });
+
+    return {
+      users,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+tag server action
+```ts
+"use server";
+
+import { connectToDatabase } from "@/lib/mogoose";
+import User from "@/database/user.model";
+import { GetTopInteractedTagsParams } from "@/lib/actions/shared";
+
+export const getTopInteractiveTags = async (
+  params: GetTopInteractedTagsParams,
+) => {
+  try {
+    const { userId } = params;
+    await connectToDatabase();
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    // find interactions for user and group by tags...
+    //   Interactions
+
+    return [
+      {
+        _id: "1",
+        name: "tag1",
+      },
+      {
+        _id: "2",
+        name: "tag2",
+      },
+      {
+        _id: "3",
+        name: "tag3",
+      },
+    ];
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+userCard component
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { getTopInteractiveTags } from "@/lib/actions/tag.action";
+import { Badge } from "@/components/ui/badge";
+import RenderTags from "@/components/shared/tags/RenderTags";
+
+type TUserCardProps = {
+  user: {
+    name: string;
+    _id: string;
+    clerkId: string;
+    picture: string;
+    username: string;
+  };
+};
+
+const UserCard: FC<TUserCardProps> = async ({
+  user: { name, picture, username, clerkId, _id },
+}) => {
+  const interactedTags = await getTopInteractiveTags({ userId: _id });
+  return (
+    <Link
+      href={`/profile/${_id}`}
+      className={
+        "w-full border shadow-xl dark:border-none max-xs:min-w-full xs:w-[260px]"
+      }
+    >
+      <article className="background-light900_dark200 light-border flex w-full flex-col items-center justify-center rounded-2xl border p-8">
+        <Image
+          src={picture}
+          alt={"profile picture"}
+          width={100}
+          height={100}
+          className={"rounded-full"}
+        />
+        <div className="mt-4 text-center">
+          <h3 className="h3-bold text-dark200_light900 line-clamp-1">{name}</h3>
+          <p className="body-regular text-dark500_light500 mt-2">@{username}</p>
+        </div>
+
+        <div className="mt-5">
+          {interactedTags.length > 0 ? (
+            <div className={"flex items-center gap-2"}>
+              {interactedTags.map((tag) => (
+                <RenderTags key={tag._id} _id={tag._id} name={tag.name} />
+              ))}
+            </div>
+          ) : (
+            <Badge>No tags yet</Badge>
+          )}
+        </div>
+      </article>
+    </Link>
+  );
+};
+
+export default UserCard;
+```
+creating Community page
+```tsx
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { UserFilters } from "@/constants/filters";
+import { getAllUsers } from "@/lib/actions/user.action";
+import Link from "next/link";
+import UserCard from "@/components/cards/UserCard";
+
+const CommunityPage = async () => {
+  const results = await getAllUsers({});
+  console.log(results);
+  return (
+    <>
+      <h1 className={"h1-bold text-dark100_light900"}>All Users</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/community"}
+          iconPosition={"left"}
+          placeholder={"Search for amazing minds"}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={UserFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <section className={"mt-12 flex flex-wrap gap-4 "}>
+        {results.users.length > 0 ? (
+          results.users.map((user) => <UserCard key={user._id} user={user} />)
+        ) : (
+          <div
+            className={
+              "paragraph-regular text-dark200_light800 mx-auto max-w-4xl text-center"
+            }
+          >
+            <p>No users Yet</p>
+            <Link
+              href={"/sign-up"}
+              className={"mt-2 font-bold text-accent-blue"}
+            >
+              Join To Be The First
+            </Link>
+          </div>
+        )}
+      </section>
+    </>
+  );
+};
+
+export default CommunityPage;
+```
+![Alt text](image-153.png)
 ## Tags Page 🔲
 ## Question Details 🔲
 ## Voting 🔲
