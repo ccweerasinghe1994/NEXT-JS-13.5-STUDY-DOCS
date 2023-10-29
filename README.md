@@ -61,7 +61,8 @@
     - [Deploy Webhooks ✅](#deploy-webhooks-)
   - [Community Page ✅](#community-page-)
     - [Create Community Page ✅](#create-community-page-)
-  - [Tags Page 🔲](#tags-page-)
+  - [Tags Page ✅](#tags-page-)
+    - [Create Tags Page ✅](#create-tags-page-)
   - [Question Details 🔲](#question-details-)
   - [Voting 🔲](#voting-)
   - [Collections Page 🔲](#collections-page-)
@@ -5671,7 +5672,114 @@ const CommunityPage = async () => {
 export default CommunityPage;
 ```
 ![Alt text](image-153.png)
-## Tags Page 🔲
+## Tags Page ✅
+### Create Tags Page ✅
+let's createa  tags page 
+```tsx
+import { FC } from "react";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { TagFilters } from "@/constants/filters";
+import { getAllTags } from "@/lib/actions/tag.action";
+import TagCard from "@/components/cards/TagCard";
+import NoResult from "@/components/shared/noResult/NoResult";
+
+type TTagsPageProps = {};
+
+const TagsPage: FC<TTagsPageProps> = async () => {
+  const results = await getAllTags({});
+  return (
+    <div>
+      <h1 className={"h1-bold text-dark100_light900"}>Tags</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/tags"}
+          iconPosition={"left"}
+          placeholder={"Search for amazing minds"}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={TagFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <section className={"mt-12 flex flex-wrap gap-4 "}>
+        {results.tags.length > 0 ? (
+          results.tags.map((tag) => <TagCard key={tag._id} tag={tag} />)
+        ) : (
+          <NoResult
+            title={"No Tags Found"}
+            description={"It seems that there are no tags yet"}
+            LinkText={"Ask a question"}
+            LinkHref={"/ask-question"}
+          />
+        )}
+      </section>
+    </div>
+  );
+};
+
+export default TagsPage;
+```
+
+server action for the tags page
+```ts
+export const getAllTags = async (params: GetAllTagsParams) => {
+  try {
+    await connectToDatabase();
+    const tags = await Tag.find({});
+    return { tags };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+TagCard component
+```tsx
+import { FC } from "react";
+import Link from "next/link";
+
+type TTageProps = {
+  tag: {
+    _id: string;
+    createdOn: Date;
+    followers: string[];
+    name: string;
+    questions: Array<string>;
+  };
+};
+
+const TagCard: FC<TTageProps> = ({ tag }) => {
+  const { _id, questions } = tag;
+  return (
+    <Link href={`/tags/${_id}`} className={"shadow-2xl dark:shadow-none"}>
+      <article
+        className={
+          "background-light900_dark200 light-border flex w-full flex-col rounded-2xl border px-8 py-10 sm:w-[260px]"
+        }
+      >
+        <div className="background-light800_dark400 w-fit rounded-sm px-5 py-1.5">
+          <p className="paragraph-semibold text-dark300_light900">{tag.name}</p>
+        </div>
+        <p className="small-medium text-dark400_light500 mt-3.5">
+          <span className="body-semibold primary-text-gradient mr-2.5">
+            {questions.length}+
+          </span>{" "}
+          Questions
+        </p>
+      </article>
+    </Link>
+  );
+};
+
+export default TagCard;
+```
+
+![Alt text](image-154.png)
 ## Question Details 🔲
 ## Voting 🔲
 ## Collections Page 🔲
