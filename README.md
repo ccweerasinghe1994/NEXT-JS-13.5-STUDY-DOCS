@@ -63,14 +63,14 @@
     - [Create Community Page ✅](#create-community-page-)
   - [Tags Page ✅](#tags-page-)
     - [Create Tags Page ✅](#create-tags-page-)
-  - [Question Details 🔲](#question-details-)
+  - [Question Details Page ✅](#question-details-page-)
     - [Create Question Details Page ✅](#create-question-details-page-)
     - [Parse \_ display Question Content ✅](#parse-_-display-question-content-)
     - [Create Answer Form ✅](#create-answer-form-)
     - [Create Answer Model ✅](#create-answer-model-)
     - [Implement Create Answer action ✅](#implement-create-answer-action-)
     - [Integrate Create Answer action inside Answer Form](#integrate-create-answer-action-inside-answer-form)
-    - [Display All Answers](#display-all-answers)
+    - [Display All Answers ✅](#display-all-answers-)
   - [Voting 🔲](#voting-)
   - [Collections Page 🔲](#collections-page-)
   - [Views 🔲](#views-)
@@ -5787,7 +5787,7 @@ export default TagCard;
 ```
 
 ![Alt text](image-154.png)
-## Question Details 🔲
+## Question Details Page ✅
 ### Create Question Details Page ✅
 let's create a server action for the question details page
 ```ts
@@ -6354,10 +6354,110 @@ const Page: FC<TPageProps> = async ({ params }) => {
 
 ```
 
-```tsx
-### Integrate Create Answer action inside Answer Form
-### Display All Answers
 
+### Integrate Create Answer action inside Answer Form
+get answer by question id server action
+```ts
+export const getAnswerByQuestionId = async (params: GetAnswersParams) => {
+  const { questionId } = params;
+
+  try {
+    const answers = await Answer.find({
+      question: questionId,
+    })
+      .populate({
+        path: "author",
+        model: "User",
+        select: "_id clerkId picture name",
+      })
+      .sort({
+        createdAt: -1,
+      });
+    return {
+      answers,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+```
+### Display All Answers ✅
+display all answers
+```tsx
+import Filter from '@/components/shared/filters/Filter';
+import { AnswerFilters } from '@/constants/filters';
+import { getAnswerByQuestionId } from '@/lib/actions/answer.action';
+import { getTimStamp } from '@/lib/utils';
+import { ObjectId } from 'mongoose';
+import Image from 'next/image';
+import Link from 'next/link';
+import { FC } from 'react';
+import ParseHTML from '../parseHtml/ParseHTML';
+
+type TAllAnswerProps = {
+	questionId: ObjectId;
+	userId: ObjectId;
+	totalAnswers: number;
+	page?: number;
+	filter?: string;
+};
+
+const AllAnswers: FC<TAllAnswerProps> = async ({
+	totalAnswers,
+	userId,
+	questionId
+}) => {
+	const result = await getAnswerByQuestionId({
+		questionId
+	});
+	const { answers } = result;
+	return (
+		<div className={'mt-11'}>
+			<div className="flex items-center justify-between">
+				<h3 className="primary-text-gradient">{totalAnswers} Answers</h3>
+				<Filter filters={AnswerFilters} />
+			</div>
+			<div className="">
+				{answers.map((answer) => (
+					<article className={'light-border border-b py-10'} key={answer._id}>
+						<div className="mb-8 flex items-center justify-between">
+							<div className="flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+								<Link
+									href={`/profile/${answer.author.clerkId}`}
+									className={'flex flex-1 items-start gap-1 sm:items-center'}
+								>
+									<Image
+										src={answer.author.picture}
+										width={18}
+										height={18}
+										alt={'profile'}
+										className={'rounded-full object-cover max-sm:mt-0.5'}
+									/>
+									<div className="flex flex-col sm:flex-row sm:items-center">
+										<p className="body-semibold text-dark300_light700">
+											{answer.author.name}
+										</p>
+										<p className="small-regular text-dark400_light500 ml-0.5 mt-0.5 line-clamp-1">
+											<span className="max-sm:hidden"> -</span>
+											answered {getTimStamp(answer.createdAt)}
+										</p>
+									</div>
+								</Link>
+							</div>
+							<div className="flex justify-end">VOTTING</div>
+						</div>
+						<ParseHTML data={answer.content} />
+					</article>
+				))}
+			</div>
+		</div>
+	);
+};
+
+export default AllAnswers;
+```
+![Alt text](image-157.png)
 ## Voting 🔲
 ## Collections Page 🔲
 ## Views 🔲
