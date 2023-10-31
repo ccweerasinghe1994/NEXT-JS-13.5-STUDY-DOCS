@@ -66,8 +66,8 @@
   - [Question Details 🔲](#question-details-)
     - [Create Question Details Page ✅](#create-question-details-page-)
     - [Parse \_ display Question Content ✅](#parse-_-display-question-content-)
-    - [Create Answer Form](#create-answer-form)
-    - [Create Answer Model](#create-answer-model)
+    - [Create Answer Form ✅](#create-answer-form-)
+    - [Create Answer Model ✅](#create-answer-model-)
     - [Implement Create Answer action](#implement-create-answer-action)
     - [Integrate Create Answer action inside Answer Form](#integrate-create-answer-action-inside-answer-form)
     - [Display All Answers](#display-all-answers)
@@ -6053,7 +6053,7 @@ export default ParseHTML;
 ```
 
 
-### Create Answer Form
+### Create Answer Form ✅
 schema 
 ```ts
 import * as z from "zod";
@@ -6214,7 +6214,52 @@ const Answer = () => {
 
 export default Answer;
 ```
-### Create Answer Model
+### Create Answer Model ✅
+
+```ts
+import type { Document, ObjectId } from "mongoose";
+import { model, models, Schema } from "mongoose";
+
+export interface IAnswer extends Document {
+  author: ObjectId;
+  question: ObjectId;
+  content: string;
+  upvotes: ObjectId[];
+  downvotes: ObjectId[];
+  createdAt: Date;
+}
+
+const AnswerSchema = new Schema<IAnswer>({
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  question: {
+    type: Schema.Types.ObjectId,
+    ref: "Question",
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  upvotes: {
+    type: [Schema.Types.ObjectId],
+    ref: "User",
+    default: [],
+  },
+  downvotes: {
+    type: [Schema.Types.ObjectId],
+    ref: "User",
+    default: [],
+  },
+});
+
+const Question = models.Answer || model<IAnswer>("Answer", AnswerSchema);
+
+export default Question;
+```
 ### Implement Create Answer action
 ### Integrate Create Answer action inside Answer Form
 ### Display All Answers
