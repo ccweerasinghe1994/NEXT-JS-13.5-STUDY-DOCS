@@ -68,7 +68,7 @@
     - [Parse \_ display Question Content ✅](#parse-_-display-question-content-)
     - [Create Answer Form ✅](#create-answer-form-)
     - [Create Answer Model ✅](#create-answer-model-)
-    - [Implement Create Answer action](#implement-create-answer-action)
+    - [Implement Create Answer action ✅](#implement-create-answer-action-)
     - [Integrate Create Answer action inside Answer Form](#integrate-create-answer-action-inside-answer-form)
     - [Display All Answers](#display-all-answers)
   - [Voting 🔲](#voting-)
@@ -6260,7 +6260,101 @@ const Question = models.Answer || model<IAnswer>("Answer", AnswerSchema);
 
 export default Question;
 ```
-### Implement Create Answer action
+### Implement Create Answer action ✅
+
+```ts
+"use server";
+
+import { CreateAnswerParams, GetAnswersParams } from "@/lib/actions/shared";
+import { connectToDatabase } from "@/lib/mogoose";
+import { revalidatePath } from "next/cache";
+import Answer from "@/database/answer.model";
+import Question from "@/database/question.model";
+
+export const createAnswer = async (params: CreateAnswerParams) => {
+  const { content, author, question, path } = params;
+  try {
+    await connectToDatabase();
+    const newAnswer = new Answer({
+      content,
+      author,
+      question,
+    });
+    // add answer to question
+    await Question.findByIdAndUpdate(question, {
+      $push: { answers: newAnswer._id },
+    });
+    newAnswer.save();
+    revalidatePath(path);
+    return newAnswer;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+
+implement the onSubmit method 
+```tsx
+const Answer: FC<TAnswerProps> = ({ question, questionId, authorId }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const editorRef = useRef(null);
+  const form = useForm<TAnswerSchema>({
+    resolver: zodResolver(AnswerSchema),
+    defaultValues: {
+      answer: "",
+    },
+  });
+  const { theme } = useTheme();
+  const pathName = usePathname();
+  const handleCreateAnswer = async (data: TAnswerSchema) => {
+    setIsSubmitting(true);
+    const { answer } = data;
+    try {
+      await createAnswer({
+        content: answer,
+        author: JSON.parse(authorId),
+        question: JSON.parse(questionId),
+        path: pathName,
+      });
+      form.reset();
+      const editor = editorRef.current as any;
+      editor.setContent("");
+      setIsSubmitting(false);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  };
+```
+
+passing the props to Answer component
+```tsx
+
+const Page: FC<TPageProps> = async ({ params }) => {
+  const { question } = await getQuestionById({ questionId: params.id });
+  const { userId: clerkId } = auth();
+  let mongoUser;
+  if (clerkId) {
+    mongoUser = await getUserById({ userId: clerkId });
+  }
+
+
+---------------------- rest of the content
+
+      </div>
+      <Answer
+        question={question.content}
+        questionId={JSON.stringify(question._id)}
+        authorId={JSON.stringify(mongoUser?._id ?? "")}
+      />
+    </>
+  );
+
+```
+
+```tsx
 ### Integrate Create Answer action inside Answer Form
 ### Display All Answers
 
