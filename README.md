@@ -64,6 +64,13 @@
   - [Tags Page ✅](#tags-page-)
     - [Create Tags Page ✅](#create-tags-page-)
   - [Question Details 🔲](#question-details-)
+    - [Create Question Details Page ✅](#create-question-details-page-)
+    - [Parse \_ display Question Content ✅](#parse-_-display-question-content-)
+    - [Create Answer Form](#create-answer-form)
+    - [Create Answer Model](#create-answer-model)
+    - [Implement Create Answer action](#implement-create-answer-action)
+    - [Integrate Create Answer action inside Answer Form](#integrate-create-answer-action-inside-answer-form)
+    - [Display All Answers](#display-all-answers)
   - [Voting 🔲](#voting-)
   - [Collections Page 🔲](#collections-page-)
   - [Views 🔲](#views-)
@@ -5781,6 +5788,277 @@ export default TagCard;
 
 ![Alt text](image-154.png)
 ## Question Details 🔲
+### Create Question Details Page ✅
+let's create a server action for the question details page
+```ts
+export const getQuestionById = async (
+  params: GetQuestionByIdParams,
+): Promise<{
+  question: {
+    _id: ObjectId;
+    views: number;
+    title: string;
+    upvotes: any;
+    downvotes: any;
+    author: IUser;
+    tags: ITag[];
+    answers: any;
+    createdAt: Date;
+    content: string;
+  };
+}> => {
+  const { questionId } = params;
+  try {
+    const result = await Question.findById(questionId)
+      .populate({
+        path: "tags",
+        model: Tag,
+        select: "_id name",
+      })
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id name picture clerkId",
+      });
+    return { question: result };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+let's create a question details page
+```tsx
+import { getQuestionById } from "@/lib/actions/question.action";
+import Image from "next/image";
+import Link from "next/link";
+import Metric from "@/components/shared/metric/Metric";
+import { getTimStamp } from "@/lib/utils";
+import ParseHTML from "@/components/shared/parseHtml/ParseHTML";
+
+const Page = async ({ params }) => {
+  const { question } = await getQuestionById({ questionId: params.id });
+
+  return (
+    <>
+      <div className="flex-start w-full flex-col">
+        <div className="flex w-full flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+          <Link
+            className={"flex items-center justify-start gap-1"}
+            href={`/profile/${question.author.clerkId}`}
+          >
+            <Image
+              className={"rounded-full"}
+              src={question.author.picture}
+              alt={"profile picture"}
+              height={22}
+              width={22}
+            />
+            <p className="paragraph-semibold text-dark300_light700">
+              {question.author.name}
+            </p>
+          </Link>
+          <div className="flex justify-end">VOTING</div>
+        </div>
+        <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
+          {question.title}
+        </h2>
+      </div>
+      <div className=" mb-8 mt-5 flex flex-wrap gap-4">
+        <Metric
+          imageUrl={"/assets/icons/clock.svg"}
+          alt={"clock icons"}
+          value={` asked ${getTimStamp(question.createdAt)}`}
+          title={""}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+        <Metric
+          imageUrl={"/assets/icons/message.svg"}
+          alt={"Upvotes"}
+          value={question.answers.length}
+          title={" Answers"}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+        <Metric
+          imageUrl={"/assets/icons/eye.svg"}
+          alt={"eye"}
+          value={question.views}
+          title={" Views"}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+      </div>
+      <ParseHTML data={question.content} />
+    </>
+  );
+};
+
+export default Page;
+```
+
+and parseHTML component
+```tsx
+import { FC } from "react";
+
+type TParseHTMLProps = {
+  data: string;
+};
+
+const ParseHTML: FC<TParseHTMLProps> = ({ data }) => {
+  return <div>{data}</div>;
+};
+
+export default ParseHTML;
+```
+### Parse _ display Question Content ✅
+![Alt text](image-155.png)
+let's install the react-html-parser prismjs and @types/prismjs
+
+```shell
+npm i react-html-parser prismjs 
+```
+
+```shell
+npm i -D @types/prismjs
+```
+
+let's choose a css theme for the prismjs
+![Alt text](image-156.png)
+
+adding render tags part
+```tsx
+import { getQuestionById } from "@/lib/actions/question.action";
+import Image from "next/image";
+import Link from "next/link";
+import Metric from "@/components/shared/metric/Metric";
+import { getTimStamp } from "@/lib/utils";
+import ParseHTML from "@/components/shared/parseHtml/ParseHTML";
+import RenderTag from "@/components/shared/tags/RenderTag";
+import { FC } from "react";
+import Answer from "@/components/forms/Answer";
+
+type TPageProps = {
+  params: {
+    id: string;
+  };
+};
+
+const Page: FC<TPageProps> = async ({ params }) => {
+  const { question } = await getQuestionById({ questionId: params.id });
+
+  return (
+    <>
+      <div className="flex-start w-full flex-col">
+        <div className="flex w-full flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+          <Link
+            className={"flex items-center justify-start gap-1"}
+            href={`/profile/${question.author.clerkId}`}
+          >
+            <Image
+              className={"rounded-full"}
+              src={question.author.picture}
+              alt={"profile picture"}
+              height={22}
+              width={22}
+            />
+            <p className="paragraph-semibold text-dark300_light700">
+              {question.author.name}
+            </p>
+          </Link>
+          <div className="flex justify-end">VOTING</div>
+        </div>
+        <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
+          {question.title}
+        </h2>
+      </div>
+      <div className=" mb-8 mt-5 flex flex-wrap gap-4">
+        <Metric
+          imageUrl={"/assets/icons/clock.svg"}
+          alt={"clock icons"}
+          value={` asked ${getTimStamp(question.createdAt)}`}
+          title={""}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+        <Metric
+          imageUrl={"/assets/icons/message.svg"}
+          alt={"Upvotes"}
+          value={question.answers.length}
+          title={" Answers"}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+        <Metric
+          imageUrl={"/assets/icons/eye.svg"}
+          alt={"eye"}
+          value={question.views}
+          title={" Views"}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+      </div>
+      <ParseHTML data={question.content} />
+      <div className="mt-8 flex flex-wrap gap-4">
+        {question.tags.map((tag) => (
+          <RenderTag key={tag._id} _id={tag._id} name={tag.name} />
+        ))}
+      </div>
+      <Answer />
+    </>
+  );
+};
+
+export default Page;
+
+```
+
+ParseHtml Componet
+```tsx
+"use client";
+import { FC, useEffect } from "react";
+import parse from "html-react-parser";
+import Prism from "prismjs";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-java";
+import "prismjs/components/prism-c";
+import "prismjs/components/prism-cpp";
+import "prismjs/components/prism-csharp";
+import "prismjs/components/prism-aspnet";
+import "prismjs/components/prism-sass";
+import "prismjs/components/prism-jsx";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-solidity";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-dart";
+import "prismjs/components/prism-ruby";
+import "prismjs/components/prism-rust";
+import "prismjs/components/prism-r";
+import "prismjs/components/prism-kotlin";
+import "prismjs/components/prism-go";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-sql";
+import "prismjs/components/prism-mongodb";
+import "prismjs/plugins/line-numbers/prism-line-numbers.js";
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
+
+type TParseHTMLProps = {
+  data: string;
+};
+
+const ParseHTML: FC<TParseHTMLProps> = ({ data }) => {
+  useEffect(() => {
+    Prism.highlightAll();
+  }, []);
+  return <div>{parse(data)}</div>;
+};
+
+export default ParseHTML;
+```
+
+
+### Create Answer Form
+### Create Answer Model
+### Implement Create Answer action
+### Integrate Create Answer action inside Answer Form
+### Display All Answers
+
 ## Voting 🔲
 ## Collections Page 🔲
 ## Views 🔲
