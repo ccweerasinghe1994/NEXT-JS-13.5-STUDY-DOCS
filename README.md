@@ -74,7 +74,7 @@
   - [Voting 🔲](#voting-)
     - [Create Votes UI ✅](#create-votes-ui-)
     - [Create Upvote-DownVote actions for Question ✅](#create-upvote-downvote-actions-for-question-)
-    - [Integrate Question upvote-downvote actions on UI](#integrate-question-upvote-downvote-actions-on-ui)
+    - [Integrate Question upvote-downvote actions on UI ✅](#integrate-question-upvote-downvote-actions-on-ui-)
     - [Create Answer Voting](#create-answer-voting)
   - [Collections Page 🔲](#collections-page-)
   - [Views 🔲](#views-)
@@ -6572,7 +6572,7 @@ export const upVoteQuestion = async (params: QuestionVoteParams) => {
     if (hasUpVoted) {
       updateQuery = { $pull: { upvotes: userId } };
     } else if (hasDownVoted) {
-      updateQuery = {
+      updateQuery = { 
         $pull: { downvotes: userId },
         $push: { upvotes: userId },
       };
@@ -6622,7 +6622,61 @@ export const downVoteQuestion = async (params: QuestionVoteParams) => {
   }
 };
 ```
-### Integrate Question upvote-downvote actions on UI
+### Integrate Question upvote-downvote actions on UI ✅
+
+![Alt text](image-159.png)
+
+```tsx
+  const pathName = usePathname();
+  const handleSave = () => {};
+  const handleVote = async (action: "upvote" | "downVote") => {
+    if (!userId) return;
+
+    if (action === "upvote") {
+      if (type === "question") {
+        await upVoteQuestion({
+          questionId: itemId,
+          userId,
+          hasUpVoted,
+          hasDownVoted,
+          path: pathName,
+        });
+      } else if (type === "answer") {
+        // await upVoteAnswer({
+        //   questionId: itemId,
+        //   userId,
+        //   hasUpVoted,
+        //   hasDownVoted,
+        //   path: pathName,
+        // });
+      }
+    }
+
+    if (action === "downVote") {
+      if (type === "question") {
+        await downVoteQuestion({
+          questionId: itemId,
+          userId,
+          hasUpVoted,
+          hasDownVoted,
+          path: pathName,
+        });
+      } else if (type === "answer") {
+        // await downVoteAnswer({
+        //   questionId: itemId,
+        //   userId,
+        //   hasUpVoted,
+        //   hasDownVoted,
+        //   path: pathName,
+        // });
+      }
+    }
+  };
+```
+
+![Alt text](image-160.png)
+
+![Alt text](image-161.png)
 ### Create Answer Voting
 
 ## Collections Page 🔲
