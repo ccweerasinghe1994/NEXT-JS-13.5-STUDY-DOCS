@@ -73,7 +73,7 @@
     - [Display All Answers ✅](#display-all-answers-)
   - [Voting 🔲](#voting-)
     - [Create Votes UI ✅](#create-votes-ui-)
-    - [Create Upvote-DownVote actions for Question](#create-upvote-downvote-actions-for-question)
+    - [Create Upvote-DownVote actions for Question ✅](#create-upvote-downvote-actions-for-question-)
     - [Integrate Question upvote-downvote actions on UI](#integrate-question-upvote-downvote-actions-on-ui)
     - [Create Answer Voting](#create-answer-voting)
   - [Collections Page 🔲](#collections-page-)
@@ -6561,7 +6561,67 @@ export default Votes;
 
 
 
-### Create Upvote-DownVote actions for Question
+### Create Upvote-DownVote actions for Question ✅
+
+```ts
+export const upVoteQuestion = async (params: QuestionVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { questionId, path, hasUpVoted, hasDownVoted, userId } = params;
+    let updateQuery: any = {};
+    if (hasUpVoted) {
+      updateQuery = { $pull: { upvotes: userId } };
+    } else if (hasDownVoted) {
+      updateQuery = {
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { upvotes: userId } };
+    }
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const downVoteQuestion = async (params: QuestionVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { questionId, path, hasUpVoted, hasDownVoted, userId } = params;
+    let updateQuery: any = {};
+    if (hasDownVoted) {
+      updateQuery = { $pull: { downvotes: userId } };
+    } else if (hasUpVoted) {
+      updateQuery = {
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { downvotes: userId } };
+    }
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
 ### Integrate Question upvote-downvote actions on UI
 ### Create Answer Voting
 
