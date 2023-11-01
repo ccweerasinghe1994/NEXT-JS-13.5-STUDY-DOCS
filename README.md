@@ -71,11 +71,11 @@
     - [Implement Create Answer action ✅](#implement-create-answer-action-)
     - [Integrate Create Answer action inside Answer Form](#integrate-create-answer-action-inside-answer-form)
     - [Display All Answers ✅](#display-all-answers-)
-  - [Voting 🔲](#voting-)
+  - [Voting ✅](#voting-)
     - [Create Votes UI ✅](#create-votes-ui-)
     - [Create Upvote-DownVote actions for Question ✅](#create-upvote-downvote-actions-for-question-)
     - [Integrate Question upvote-downvote actions on UI ✅](#integrate-question-upvote-downvote-actions-on-ui-)
-    - [Create Answer Voting](#create-answer-voting)
+    - [Create Answer Voting ✅](#create-answer-voting-)
   - [Collections Page 🔲](#collections-page-)
   - [Views 🔲](#views-)
   - [Tag Details Page 🔲](#tag-details-page-)
@@ -6462,7 +6462,7 @@ const AllAnswers: FC<TAllAnswerProps> = async ({
 export default AllAnswers;
 ```
 ![Alt text](image-157.png)
-## Voting 🔲
+## Voting ✅
 ### Create Votes UI ✅
 
 ![Alt text](image-158.png)
@@ -6677,7 +6677,99 @@ export const downVoteQuestion = async (params: QuestionVoteParams) => {
 ![Alt text](image-160.png)
 
 ![Alt text](image-161.png)
-### Create Answer Voting
+### Create Answer Voting ✅
+server actions 
+```ts
+export const upVoteAnswer = async (params: AnswerVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, path, answerId, hasUpVoted, hasDownVoted } = params;
+    let updateQuery: any = {};
+    if (hasUpVoted) {
+      updateQuery = { $pull: { upvotes: userId } };
+    } else if (hasDownVoted) {
+      updateQuery = {
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { upvotes: userId } };
+    }
+    const answer = await Answer.findByIdAndUpdate(answerId, updateQuery, {
+      new: true,
+    });
+    if (!answer) {
+      throw new Error("Answer not found");
+    }
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const downVoteAnswer = async (params: AnswerVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, path, answerId, hasUpVoted, hasDownVoted } = params;
+    let updateQuery: any = {};
+    if (hasDownVoted) {
+      updateQuery = { $pull: { downvotes: userId } };
+    } else if (hasUpVoted) {
+      updateQuery = {
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { downvotes: userId } };
+    }
+    const answer = await Answer.findByIdAndUpdate(answerId, updateQuery, {
+      new: true,
+    });
+    if (!answer) {
+      throw new Error("Answer not found");
+    }
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+add it to the all action file
+```tsx
+                      answered {getTimStamp(answer.createdAt)}
+                    </p>
+                  </div>
+                </Link>
+              </div>
+              <div className="flex justify-end">
+                <Votes
+                  type={"answer"}
+                  itemId={answer._id}
+                  userId={userId}
+                  upvotes={answer.upvotes.length}
+                  hasUpVoted={answer.upvotes.includes(userId)}
+                  downVotes={answer.downvotes.length}
+                  hasDownVoted={answer.downvotes.includes(userId)}
+                />
+              </div>
+            </div>
+            <ParseHTML data={answer.content} />
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+conditionaly render the votes saved icon.
+
+![Alt text](image-162.png)
 
 ## Collections Page 🔲
 ## Views 🔲
