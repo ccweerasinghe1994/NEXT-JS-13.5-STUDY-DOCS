@@ -76,11 +76,11 @@
     - [Create Upvote-DownVote actions for Question ✅](#create-upvote-downvote-actions-for-question-)
     - [Integrate Question upvote-downvote actions on UI ✅](#integrate-question-upvote-downvote-actions-on-ui-)
     - [Create Answer Voting ✅](#create-answer-voting-)
-  - [Collections Page 🔲](#collections-page-)
+  - [Collections Page ✅](#collections-page-)
     - [Implement Save Question Action and Create Collection Page ✅](#implement-save-question-action-and-create-collection-page-)
     - [Display all saved questions ✅](#display-all-saved-questions-)
-  - [Views 🔲](#views-)
-    - [Create Question Details Page View](#create-question-details-page-view)
+  - [Views ✅](#views-)
+    - [Create Question Details Page View ✅](#create-question-details-page-view-)
   - [Tag Details Page 🔲](#tag-details-page-)
     - [Create a Tag Details Page](#create-a-tag-details-page)
   - [Profile Page 🔲](#profile-page-)
@@ -6810,7 +6810,7 @@ conditionaly render the votes saved icon.
 
 ![Alt text](image-162.png)
 
-## Collections Page 🔲
+## Collections Page ✅
 
 ### Implement Save Question Action and Create Collection Page ✅
 
@@ -6997,8 +6997,103 @@ export default async function Home() {
 ![Alt text](image-165.png)
 
 
-## Views 🔲
-### Create Question Details Page View
+## Views ✅
+### Create Question Details Page View ✅
+let's create interaction model
+```ts
+import { model, models, ObjectId, Schema } from "mongoose";
+
+export interface IInteraction {
+  user: ObjectId;
+  action: string;
+  question: ObjectId;
+  answer: ObjectId;
+  tags: ObjectId[];
+  createdAt: Date;
+}
+
+const interactionSchema = new Schema<IInteraction>({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  action: {
+    type: String,
+    required: true,
+  },
+  question: {
+    type: Schema.Types.ObjectId,
+    ref: "Question",
+  },
+  answer: {
+    type: Schema.Types.ObjectId,
+    ref: "Answer",
+  },
+  tags: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Tag",
+    },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Interaction =
+  models.Interaction || model<IInteraction>("Interaction", interactionSchema);
+
+export default Interaction;
+```
+server action
+```ts
+"use server";
+
+import { ViewQuestionParams } from "@/lib/actions/shared";
+import { connectToDatabase } from "@/lib/mogoose";
+import Question from "@/database/question.model";
+import Interaction from "@/database/interaction.model";
+
+export const viewQuestion = async (params: ViewQuestionParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, questionId } = params;
+    await Question.findByIdAndUpdate(questionId, {
+      $inc: { views: 1 },
+    });
+
+    if (userId) {
+      const existingInteraction = await Interaction.findOne({
+        user: userId,
+        action: "view",
+        question: questionId,
+      });
+      if (existingInteraction) return console.log("Already viewed");
+      await Interaction.create({
+        user: userId,
+        action: "view",
+        question: questionId,
+      });
+    }
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+```
+
+let's add the server action in the Votes page 
+```ts
+
+  useEffect(() => {
+    viewQuestion({ questionId: itemId, userId });
+  }, [itemId, userId, router, pathName]);
+```
+
+![Alt text](image-166.png)
+
 ## Tag Details Page 🔲
 ### Create a Tag Details Page
 ## Profile Page 🔲
