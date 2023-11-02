@@ -81,8 +81,8 @@
     - [Display all saved questions ✅](#display-all-saved-questions-)
   - [Views ✅](#views-)
     - [Create Question Details Page View ✅](#create-question-details-page-view-)
-  - [Tag Details Page 🔲](#tag-details-page-)
-    - [Create a Tag Details Page](#create-a-tag-details-page)
+  - [Tag Details Page ✅](#tag-details-page-)
+    - [Create a Tag Details Page ✅](#create-a-tag-details-page-)
   - [Profile Page 🔲](#profile-page-)
     - [Create Profile Page](#create-profile-page)
     - [Create User Stats UI](#create-user-stats-ui)
@@ -7094,8 +7094,117 @@ let's add the server action in the Votes page
 
 ![Alt text](image-166.png)
 
-## Tag Details Page 🔲
-### Create a Tag Details Page
+## Tag Details Page ✅
+### Create a Tag Details Page ✅
+let's create a server action 
+```ts
+export const getQuestionByTagId = async (params: GetQuestionsByTagIdParams) => {
+  try {
+    await connectToDatabase();
+    const { tagId, searchQuery } = params;
+    const tagFilter: FilterQuery<ITag> = {
+      _id: tagId,
+    };
+    const tag = await Tag.findOne(tagFilter).populate({
+      path: "questions",
+      model: Question,
+      match: searchQuery
+        ? { title: { $regex: new RegExp(searchQuery, "i") } }
+        : {},
+      options: {
+        sort: {
+          createdAt: -1,
+        },
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "name _id",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "name _id clerkId picture",
+          },
+        ],
+      },
+    });
+
+    if (!tag) {
+      throwError("Tag not found");
+    }
+
+    const questions = tag.questions;
+
+    return {
+      tagTitle: tag.name,
+      questions,
+    };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+```
+![Alt text](image-167.png)
+
+tags details page
+```tsx
+import { FC } from "react";
+import { getQuestionByTagId } from "@/lib/actions/tag.action";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import { TQuestion, URLProps } from "@/types/types";
+import QuestionCard from "@/components/cards/QuestionCard";
+import NoResult from "@/components/shared/noResult/NoResult";
+
+const Page: FC<URLProps> = async ({ params, searchParams }) => {
+  const { questions, tagTitle } = await getQuestionByTagId({
+    tagId: params.id,
+    page: 1,
+    searchQuery: searchParams.q,
+  });
+
+  return (
+    <div>
+      <h1 className={"h1-bold text-dark100_light900"}>{tagTitle}</h1>
+
+      <div className="mt-11 w-full">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Tag Questions ..."}
+          otherClasses={"flex-1"}
+        />
+      </div>
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map((question: TQuestion) => (
+            // <QuestionCard key={question._id} question={question} />
+            <QuestionCard key={question._id} question={question} />
+          ))
+        ) : (
+          <NoResult
+            title={"There is no tag questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Page;
+```
+
+![Alt text](image-169.png)
+
 ## Profile Page 🔲
 
 
