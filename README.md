@@ -7520,8 +7520,202 @@ export default LeftSideBar;
 ![Alt text](image-173.png)
 
 ### Create User Stats UI
+Stats component
+```tsx
+import { FC } from "react";
+import { formatNumber } from "@/lib/utils";
+import Image from "next/image";
+
+type TStatsCard = {
+  imageUrl: string;
+  value: number;
+  title: string;
+};
+const StatsCard: FC<TStatsCard> = ({ imageUrl, value, title }) => {
+  return (
+    <div className="light-border background-light900_dark300 flex flex-wrap items-center justify-start gap-4 rounded-md border p-6 shadow-light-300 dark:shadow-dark-200">
+      <Image src={imageUrl} alt={title} height={50} width={40} />
+      <div className="">
+        <p className="paragraph-semibold text-dark200_light900">{value}</p>
+        <p className="body-medium text-dark400_light900">{title}</p>
+      </div>
+    </div>
+  );
+};
+
+type TStats = {
+  totalQuestions: number;
+  totalAnswers: number;
+};
+
+const Stats: FC<TStats> = ({ totalAnswers, totalQuestions }) => {
+  return (
+    <div className={"mt-10"}>
+      <h4 className="h3-semibold text-dark200_light900">Stats</h4>
+      <div className="mt-5 grid grid-cols-1 gap-5 xs:grid-cols-2 md:grid-cols-4 ">
+        <div className="light-border background-light900_dark300 flex flex-wrap items-center justify-evenly gap-4 rounded-md border p-6 shadow-light-300 dark:shadow-dark-200">
+          <div className="">
+            <p className="paragraph-semibold text-dark200_light900">
+              {formatNumber(totalQuestions)}
+            </p>
+            <p className="body-medium text-dark400_light900">Questions</p>
+          </div>
+          <div className="">
+            <p className="paragraph-semibold text-dark200_light900">
+              {formatNumber(totalAnswers)}
+            </p>
+            <p className="body-medium text-dark400_light900">Answers</p>
+          </div>
+        </div>
+        <StatsCard
+          value={0}
+          title={"Gold Badges"}
+          imageUrl={"/assets/icons/gold-medal.svg"}
+        />{" "}
+        <StatsCard
+          value={0}
+          title={"Silver Badges"}
+          imageUrl={"/assets/icons/silver-medal.svg"}
+        />{" "}
+        <StatsCard
+          value={0}
+          title={"Bronze Badges"}
+          imageUrl={"/assets/icons/bronze-medal.svg"}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Stats;
+```
+
+![Alt text](image-174.png)
+
+using the Stats component
+```tsx
+import { FC } from "react";
+import { URLProps } from "@/types/types";
+import { getUserInfo } from "@/lib/actions/user.action";
+import Image from "next/image";
+import { auth, SignedIn } from "@clerk/nextjs";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { convertDate } from "@/lib/utils";
+import ProfileLink from "@/components/shared/profileLink/ProfileLink";
+import Stats from "@/components/shared/stats/Stats";
+import QuestionTab from "@/components/shared/tabs/QuestionTab";
+import AnswerTab from "@/components/shared/tabs/AnswerTab";
+
+const Page: FC<URLProps> = async ({ params, searchParams }) => {
+  const result = await getUserInfo({ userId: params.id });
+  const { userId: clerkId } = auth();
+  return (
+    <>
+      <div
+        className={
+          "flex flex-col-reverse items-start justify-between sm:flex-row"
+        }
+      >
+        <div className={"flex flex-col items-start gap-4 lg:flex-row"}>
+          <Image
+            src={result.user.picture}
+            alt={"profile picture"}
+            height={128}
+            width={128}
+            className={"rounded-full object-cover"}
+          />
+          <div className="mt-3">
+            <h2 className={"h2-bold text-dark100_light900"}>
+              {result.user.name}
+            </h2>
+            <p className={"paragraph-regular text-dark200_light800"}>
+              @{result.user.username}
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-start gap-5">
+              {result.user?.location && (
+                <ProfileLink
+                  imageUrl={"/assets/icons/location.svg"}
+                  title={result.user?.location}
+                />
+              )}
+              {result.user?.portfolioWebsite && (
+                <ProfileLink
+                  imageUrl={"/assets/icons/link.svg"}
+                  href={result.user?.portfolioWebsite}
+                  title={"Portfolio"}
+                />
+              )}
+              {
+                <ProfileLink
+                  imageUrl={"/assets/icons/calendar.svg"}
+                  title={convertDate(result.user?.joinedAt)}
+                />
+              }
+            </div>
+            {result.user?.bio && (
+              <p className={"paragraph-regular text-dark400_light800 mt-8"}>
+                {result.user?.bio}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end max-sm:mb-5 max-sm:w-full sm:mt-3">
+          <SignedIn>
+            {clerkId === result.user.clerkId && (
+              <Link href={`/profile/edit`}>
+                <Button
+                  className={
+                    "paragraph-medium btn-secondary text-dark300_light900 min-h-[46px] min-w-[176px] px-4 py-3"
+                  }
+                >
+                  Edit Profile
+                </Button>
+              </Link>
+            )}
+          </SignedIn>
+        </div>
+      </div>
+      <Stats
+        totalQuestions={result.totalQuestions}
+        totalAnswers={result.totalAnswers}
+      />
+      <div className="mt-10 flex gap-10">
+        <Tabs defaultValue="top-posts" className="flex-1">
+          <TabsList className={"background-light800_dark400 min-h-[42px] p-1"}>
+            <TabsTrigger className={"tab"} value="top-posts">
+              Top Posts
+            </TabsTrigger>
+            <TabsTrigger className={"tab"} value="answers">
+              Answers
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="top-posts">
+            <QuestionTab />
+          </TabsContent>
+          <TabsContent value="answers">
+            <AnswerTab />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+};
+
+export default Page;
+```
+
+Tabs component
+![Alt text](image-175.png)
+
+![Alt text](image-176.png)
+
 ### Implement User Questions Tab
+
 ### Implement User Answers Tabs
+
+
 ## Edit_Delete User Actions 🔲
 
 ### Implement Edit-Delete Question-Answer Component
