@@ -78,7 +78,7 @@
     - [Create Answer Voting ✅](#create-answer-voting-)
   - [Collections Page 🔲](#collections-page-)
     - [Implement Save Question Action and Create Collection Page ✅](#implement-save-question-action-and-create-collection-page-)
-    - [Display all saved questions](#display-all-saved-questions)
+    - [Display all saved questions ✅](#display-all-saved-questions-)
   - [Views 🔲](#views-)
     - [Create Question Details Page View](#create-question-details-page-view)
   - [Tag Details Page 🔲](#tag-details-page-)
@@ -6884,11 +6884,117 @@ and create the collection page
 ![Alt text](image-163.png)
 
 ![Alt text](image-164.png)
-### Display all saved questions
+### Display all saved questions ✅
 
+let's create the server action to get all saved questions
+```ts
+export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
+  try {
+    const { page = 1, pageSize = 10, searchQuery, filter, clerkId } = params;
+    console.log(page, pageSize, searchQuery, filter);
+    await connectToDatabase();
+    const query: FilterQuery<typeof Question> = searchQuery
+      ? { title: { regex: new RegExp(searchQuery, "i") } }
+      : {};
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      match: query,
+      options: {
+        sort: {
+          createdAt: -1,
+        },
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "name _id",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "name _id clerkId picture",
+          },
+        ],
+      },
+    });
 
+    if (!user) {
+      throwError("User not found");
+    }
 
+    const savedQuestions = user.saved;
 
+    return {
+      questions: savedQuestions,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+and the collection page
+```tsx
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { QuestionFilters } from "@/constants/filters";
+import NoResult from "@/components/shared/noResult/NoResult";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { TQuestion } from "@/types/types";
+import { getSavedQuestion } from "@/lib/actions/user.action";
+import { auth } from "@clerk/nextjs";
+
+export default async function Home() {
+  const { userId } = auth();
+
+  if (!userId) return null;
+
+  const { questions } = await getSavedQuestion({
+    clerkId: userId,
+  });
+  return (
+    <>
+      <h1 className={"h1-bold text-dark100_light900"}>Saved Questions</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={QuestionFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map((question: TQuestion) => (
+            // <QuestionCard key={question._id} question={question} />
+            <QuestionCard key={question._id} question={question} />
+          ))
+        ) : (
+          <NoResult
+            title={"There is no saved questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+```
+
+![Alt text](image-165.png)
 
 
 ## Views 🔲
