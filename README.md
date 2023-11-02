@@ -84,7 +84,7 @@
   - [Tag Details Page ✅](#tag-details-page-)
     - [Create a Tag Details Page ✅](#create-a-tag-details-page-)
   - [Profile Page 🔲](#profile-page-)
-    - [Create Profile Page](#create-profile-page)
+    - [Create Profile Page ✅](#create-profile-page-)
     - [Create User Stats UI](#create-user-stats-ui)
     - [Implement User Questions Tab](#implement-user-questions-tab)
     - [Implement User Answers Tabs](#implement-user-answers-tabs)
@@ -7208,7 +7208,315 @@ export default Page;
 ## Profile Page 🔲
 
 
-### Create Profile Page
+### Create Profile Page ✅ 
+
+![Alt text](image-170.png)
+
+![Alt text](image-171.png)
+
+```shell
+npx shadcn-ui@latest add tabs
+```
+
+getUserInfo server action
+```ts
+export const getUserInfo = async (params: GetUserByIdParams) => {
+  try {
+    const { userId } = params;
+    await connectToDatabase();
+    const user = await User.findOne({
+      clerkId: userId,
+    });
+    if (!user) {
+      throwError("User not found");
+    }
+    const totalQuestions = await Question.countDocuments({
+      author: user._id,
+    });
+    const totalAnswers = await Answer.countDocuments({
+      author: user._id,
+    });
+    return { user, totalQuestions, totalAnswers };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+util file 
+```ts
+export const convertDate = (date: Date) => {
+  return date.toLocaleString("default", {
+    month: "long",
+    year: "numeric",
+  });
+};
+```
+
+ProfileLink componet
+```tsx
+import { FC } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
+type TProfileLinkProps = {
+  imageUrl: string;
+  title: string;
+  href?: string;
+};
+
+const ProfileLink: FC<TProfileLinkProps> = ({ imageUrl, title, href }) => {
+  return (
+    <div className={"flex-center gap-1"}>
+      <Image src={imageUrl} alt={"icon"} height={20} width={20} />
+      {href ? (
+        <Link
+          href={href}
+          target={"_blank"}
+          className={"paragraph-medium text-accent-blue"}
+        >
+          {title}
+        </Link>
+      ) : (
+        <p className={"paragraph-medium text-dark400_light700"}>{title}</p>
+      )}
+    </div>
+  );
+};
+
+export default ProfileLink;
+```
+
+Stats component
+```tsx
+const Stats = () => {
+  return <div>Stats</div>;
+};
+
+export default Stats;
+```
+
+profile id page
+```tsx
+import { FC } from "react";
+import { URLProps } from "@/types/types";
+import { getUserInfo } from "@/lib/actions/user.action";
+import Image from "next/image";
+import { auth, SignedIn } from "@clerk/nextjs";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { convertDate } from "@/lib/utils";
+import ProfileLink from "@/components/shared/profileLink/ProfileLink";
+import Stats from "@/components/shared/stats/Stats";
+
+const Page: FC<URLProps> = async ({ params, searchParams }) => {
+  const result = await getUserInfo({ userId: params.id });
+  const { userId: clerkId } = auth();
+  return (
+    <>
+      <div
+        className={
+          "flex flex-col-reverse items-start justify-between sm:flex-row"
+        }
+      >
+        <div className={"flex flex-col items-start gap-4 lg:flex-row"}>
+          <Image
+            src={result.user.picture}
+            alt={"profile picture"}
+            height={128}
+            width={128}
+            className={"rounded-full object-cover"}
+          />
+          <div className="mt-3">
+            <h2 className={"h2-bold text-dark100_light900"}>
+              {result.user.name}
+            </h2>
+            <p className={"paragraph-regular text-dark200_light800"}>
+              @{result.user.username}
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-start gap-5">
+              {result.user?.location && (
+                <ProfileLink
+                  imageUrl={"/assets/icons/location.svg"}
+                  title={result.user?.location}
+                />
+              )}
+              {result.user?.portfolioWebsite && (
+                <ProfileLink
+                  imageUrl={"/assets/icons/link.svg"}
+                  href={result.user?.portfolioWebsite}
+                  title={"Portfolio"}
+                />
+              )}
+              {
+                <ProfileLink
+                  imageUrl={"/assets/icons/calendar.svg"}
+                  title={convertDate(result.user?.joinedAt)}
+                />
+              }
+            </div>
+            {result.user?.bio && (
+              <p className={"paragraph-regular text-dark400_light800 mt-8"}>
+                {result.user?.bio}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end max-sm:mb-5 max-sm:w-full sm:mt-3">
+          <SignedIn>
+            {clerkId === result.user.clerkId && (
+              <Link href={`/profile/edit`}>
+                <Button
+                  className={
+                    "paragraph-medium btn-secondary text-dark300_light900 min-h-[46px] min-w-[176px] px-4 py-3"
+                  }
+                >
+                  Edit Profile
+                </Button>
+              </Link>
+            )}
+          </SignedIn>
+        </div>
+      </div>
+      <Stats />
+      <div className="mt-10 flex gap-10">
+        <Tabs defaultValue="top-posts" className="flex-1">
+          <TabsList className={"background-light800_dark400 min-h-[42px] p-1"}>
+            <TabsTrigger className={"tab"} value="top-posts">
+              Top Posts
+            </TabsTrigger>
+            <TabsTrigger className={"tab"} value="answers">
+              Answers
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="top-posts">POSTS</TabsContent>
+          <TabsContent value="answers">ANSWERS</TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+};
+
+export default Page;
+```
+
+left side bar component small route logic
+```tsx
+"use client";
+import { usePathname } from "next/navigation";
+import { sidebarLinks } from "@/constants";
+import Link from "next/link";
+import Image from "next/image";
+import { SignedOut, useAuth } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+
+const LeftSideBar = () => {
+  const pathName = usePathname();
+  const { userId } = useAuth();
+  return (
+    <section
+      className={
+        "background-light900_dark200 light-border custom-scrollbar sticky left-0 top-0 flex h-screen flex-col justify-between overflow-y-auto border-r p-6 pt-36 shadow-light-300 dark:shadow-none max-sm:hidden lg:w-[266px]"
+      }
+    >
+      <div className="flex flex-1 flex-col gap-6">
+        {sidebarLinks.map((link) => {
+          const isActive =
+            pathName === link.route ||
+            (pathName.includes(link.route) && link.route.length > 1);
+          if (link.route === "/profile") {
+            if (userId) {
+              link.route = `/profile/${userId}`;
+            } else {
+              return null;
+            }
+          }
+          return (
+            <div key={link.route}>
+              <Link
+                href={link.route}
+                className={`${
+                  isActive
+                    ? "primary-gradient rounded-lg text-light-900"
+                    : "text-dark300_light900"
+                } flex items-center justify-start gap-4 bg-transparent p-4 max-sm:justify-center max-sm:gap-0 max-sm:px-0`}
+              >
+                <Image
+                  src={link.imgURL}
+                  width={20}
+                  height={20}
+                  alt={link.label}
+                  className={`${isActive ? "" : "invert-colors"}`}
+                />
+                <p
+                  className={`${
+                    isActive ? "base-medium" : "base-bold"
+                  } max-lg:hidden`}
+                >
+                  {link.label}
+                </p>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+      {/* <SignedIn> */}
+      {/*  <Button */}
+      {/*    className={ */}
+      {/*      "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3" */}
+      {/*    } */}
+      {/*  > */}
+      {/*    <SignOutButton>Logout</SignOutButton> */}
+      {/*  </Button> */}
+      {/* </SignedIn> */}
+      <SignedOut>
+        <div className={"flex flex-col gap-3"}>
+          <Link href={"/sign-in"}>
+            <Button
+              className={
+                "small-medium btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/account.svg"}
+                alt={"account"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"primary-text-gradient max-lg:hidden"}>
+                Log In
+              </span>
+            </Button>
+          </Link>
+
+          <Link href={"/sign-up"}>
+            <Button
+              className={
+                "small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg px-4 py-3"
+              }
+            >
+              <Image
+                src={"/assets/icons/sign-up.svg"}
+                alt={"sign up"}
+                width={20}
+                height={20}
+                className={"invert-colors lg:hidden"}
+              />
+              <span className={"max-lg:hidden"}>Sign Up</span>
+            </Button>
+          </Link>
+        </div>
+      </SignedOut>
+    </section>
+  );
+};
+
+export default LeftSideBar;
+```
+![Alt text](image-172.png)
+
 ### Create User Stats UI
 ### Implement User Questions Tab
 ### Implement User Answers Tabs
