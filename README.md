@@ -77,30 +77,69 @@
     - [Integrate Question upvote-downvote actions on UI ✅](#integrate-question-upvote-downvote-actions-on-ui-)
     - [Create Answer Voting ✅](#create-answer-voting-)
   - [Collections Page 🔲](#collections-page-)
+    - [Implement Save Question Action and Create Collection Page ✅](#implement-save-question-action-and-create-collection-page-)
+    - [Display all saved questions](#display-all-saved-questions)
   - [Views 🔲](#views-)
+    - [Create Question Details Page View](#create-question-details-page-view)
   - [Tag Details Page 🔲](#tag-details-page-)
+    - [Create a Tag Details Page](#create-a-tag-details-page)
   - [Profile Page 🔲](#profile-page-)
+    - [Create Profile Page](#create-profile-page)
+    - [Create User Stats UI](#create-user-stats-ui)
+    - [Implement User Questions Tab](#implement-user-questions-tab)
+    - [Implement User Answers Tabs](#implement-user-answers-tabs)
   - [Edit\_Delete User Actions 🔲](#edit_delete-user-actions-)
+    - [Implement Edit-Delete Question-Answer Component](#implement-edit-delete-question-answer-component)
+    - [Create Edit Question Page](#create-edit-question-page)
+    - [Create Edit Profile Page](#create-edit-profile-page)
   - [Show Top Results 🔲](#show-top-results-)
+    - [Show Top Questions](#show-top-questions)
+    - [Show Popular Tags](#show-popular-tags)
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
+    - [Manage search state](#manage-search-state)
+    - [Implement Search functionality for the Home page](#implement-search-functionality-for-the-home-page)
+    - [Implement Search functionality for the Community page](#implement-search-functionality-for-the-community-page)
+    - [Implement Search functionality for the Collection page](#implement-search-functionality-for-the-collection-page)
+    - [Implement Search functionality for the Tags page](#implement-search-functionality-for-the-tags-page)
   - [The Filters 🔲](#the-filters-)
+    - [Manage Filter state](#manage-filter-state)
+    - [Integrate Filters on Home page](#integrate-filters-on-home-page)
+    - [Integrate Filters on the Community page](#integrate-filters-on-the-community-page)
+    - [Integrate Filters on the Collection page](#integrate-filters-on-the-collection-page)
+    - [Integrate Filters for Tags and Answers](#integrate-filters-for-tags-and-answers)
   - [The Pagination 🔲](#the-pagination-)
+    - [Create Pagination component](#create-pagination-component)
+    - [Implement pagination on the Home page](#implement-pagination-on-the-home-page)
+    - [Implement pagination for the rest of the pages](#implement-pagination-for-the-rest-of-the-pages)
   - [Global Search 🔲](#global-search--1)
+    - [Create the Global Search UI](#create-the-global-search-ui)
+    - [Create GlobalSearch Result Component](#create-globalsearch-result-component)
+    - [Create Global Search Filters](#create-global-search-filters)
+    - [Implement the GlobalSearch action](#implement-the-globalsearch-action)
   - [Reputation 🔲](#reputation-)
+    - [What is Reputation and how to approach it](#what-is-reputation-and-how-to-approach-it)
+    - [Implement Reputation points for Questions](#implement-reputation-points-for-questions)
+    - [Implement Reputation points for Answers](#implement-reputation-points-for-answers)
+    - [More on Reputation and how to extend it](#more-on-reputation-and-how-to-extend-it)
   - [Badge System 🔲](#badge-system-)
+    - [Implement the Badge System](#implement-the-badge-system)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
+    - [Setup AI Answer feature](#setup-ai-answer-feature)
+    - [Implement the API route for the AI feature](#implement-the-api-route-for-the-ai-feature)
+    - [Display the AI results on the UI](#display-the-ai-results-on-the-ui)
   - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
+    - [Setup AI Answer feature](#setup-ai-answer-feature-1)
+    - [Create a Loading state for the Community page](#create-a-loading-state-for-the-community-page)
+    - [Create Loading states for the rest of the pages](#create-loading-states-for-the-rest-of-the-pages)
+    - [Create toasts for a few actions](#create-toasts-for-a-few-actions)
   - [Meta Data 🔲](#meta-data-)
+    - [What is Metadata and how to implement it](#what-is-metadata-and-how-to-implement-it)
   - [Bug Fixing and Recommendation 🔲](#bug-fixing-and-recommendation-)
+    - [Fix bugs and implement Recommendations.](#fix-bugs-and-implement-recommendations)
   - [Next.js 13.5+ 🔲](#nextjs-135-)
+    - [Upgrade Next.js to the latest version](#upgrade-nextjs-to-the-latest-version)
   - [Deployment 🔲](#deployment-)
-    - [](#)
-    - [](#-1)
-    - [](#-2)
-    - [](#-3)
-    - [](#-4)
-    - [](#-5)
-    - [](#-6)
+    - [Deploy the application](#deploy-the-application)
 
 
 ## Setup ✅
@@ -6772,30 +6811,178 @@ conditionaly render the votes saved icon.
 ![Alt text](image-162.png)
 
 ## Collections Page 🔲
-## Views 🔲
-## Tag Details Page 🔲
-## Profile Page 🔲
-## Edit_Delete User Actions 🔲
-## Show Top Results 🔲
-## The Local Search Functionality 🔲
-## The Filters 🔲
-## The Pagination 🔲
-## Global Search 🔲
-## Reputation 🔲
-## Badge System 🔲
-## Generate AI Answer 🔲
-## Loadings _ Toasts 🔲
-## Meta Data 🔲
-## Bug Fixing and Recommendation 🔲
-## Next.js 13.5+ 🔲
-## Deployment 🔲
-### 
-### 
-### 
-### 
-### 
-### 
-### 
 
-653c791cc9e6e4ed1b36e755
-653c791cc9e5e4ed1b36e755
+### Implement Save Question Action and Create Collection Page ✅
+
+let's implement the server action to save question
+```ts
+export const toggleSaveQuestion = async (params: ToggleSaveQuestionParams) => {
+  try {
+    const { userId, questionId, path } = params;
+    await connectToDatabase();
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isSaved = user.saved.includes(questionId);
+    if (isSaved) {
+      // remove question from saved
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          $pull: {
+            saved: questionId,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    } else {
+      // add question to saved
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          $addToSet: {
+            saved: questionId,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    }
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+let's use it in the Votes component
+```tsx
+  const handleSave = async () => {
+    try {
+      if (type !== "question") return;
+      await toggleSaveQuestion({
+        questionId: itemId,
+        userId,
+        path: pathName,
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+```
+
+and create the collection page
+
+![Alt text](image-163.png)
+
+![Alt text](image-164.png)
+### Display all saved questions
+
+
+
+
+
+
+## Views 🔲
+### Create Question Details Page View
+## Tag Details Page 🔲
+### Create a Tag Details Page
+## Profile Page 🔲
+
+
+### Create Profile Page
+### Create User Stats UI
+### Implement User Questions Tab
+### Implement User Answers Tabs
+## Edit_Delete User Actions 🔲
+
+### Implement Edit-Delete Question-Answer Component
+### Create Edit Question Page
+### Create Edit Profile Page
+
+
+
+## Show Top Results 🔲
+
+### Show Top Questions
+### Show Popular Tags
+
+## The Local Search Functionality 🔲
+
+### Manage search state
+### Implement Search functionality for the Home page
+### Implement Search functionality for the Community page
+### Implement Search functionality for the Collection page
+### Implement Search functionality for the Tags page
+
+
+
+## The Filters 🔲
+
+### Manage Filter state
+### Integrate Filters on Home page
+### Integrate Filters on the Community page
+### Integrate Filters on the Collection page
+### Integrate Filters for Tags and Answers
+
+## The Pagination 🔲
+
+### Create Pagination component
+### Implement pagination on the Home page
+### Implement pagination for the rest of the pages
+
+## Global Search 🔲
+### Create the Global Search UI
+### Create GlobalSearch Result Component
+### Create Global Search Filters
+### Implement the GlobalSearch action
+
+
+## Reputation 🔲
+### What is Reputation and how to approach it
+### Implement Reputation points for Questions
+### Implement Reputation points for Answers
+### More on Reputation and how to extend it
+
+
+## Badge System 🔲
+### Implement the Badge System
+
+## Generate AI Answer 🔲
+### Setup AI Answer feature
+### Implement the API route for the AI feature
+### Display the AI results on the UI
+
+
+
+
+
+
+## Loadings _ Toasts 🔲
+### Setup AI Answer feature
+### Create a Loading state for the Community page
+### Create Loading states for the rest of the pages
+### Create toasts for a few actions
+
+
+## Meta Data 🔲
+### What is Metadata and how to implement it
+
+## Bug Fixing and Recommendation 🔲
+
+### Fix bugs and implement Recommendations.
+
+## Next.js 13.5+ 🔲
+### Upgrade Next.js to the latest version
+
+## Deployment 🔲
+### Deploy the application
+
