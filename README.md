@@ -7517,6 +7517,8 @@ export default LeftSideBar;
 ```
 ![Alt text](image-172.png)
 
+![Alt text](image-173.png)
+
 ### Create User Stats UI
 ### Implement User Questions Tab
 ### Implement User Answers Tabs
