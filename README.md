@@ -97,7 +97,7 @@
     - [Show Popular Tags ✅](#show-popular-tags-)
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
     - [Manage search state ✅](#manage-search-state-)
-    - [Implement Search functionality for the Home page](#implement-search-functionality-for-the-home-page)
+    - [Implement Search functionality for the Home page ✅](#implement-search-functionality-for-the-home-page-)
     - [Implement Search functionality for the Community page](#implement-search-functionality-for-the-community-page)
     - [Implement Search functionality for the Collection page](#implement-search-functionality-for-the-collection-page)
     - [Implement Search functionality for the Tags page](#implement-search-functionality-for-the-tags-page)
@@ -9173,7 +9173,51 @@ const LocalSearch: FC<TLocationProps> = ({
 ![Alt text](image-189.png)
 
 
-### Implement Search functionality for the Home page
+### Implement Search functionality for the Home page ✅
+```ts
+import { FilterQuery, ObjectId } from "mongoose";
+
+export async function getQuestions(params: IGetQuestionsParams) {
+  const { searchQuery } = params;
+
+  const query: FilterQuery<typeof Question> = {};
+
+  if (searchQuery) {
+    query.$or = [
+      { title: { $regex: new RegExp(searchQuery, "i") } },
+      { content: { $regex: new RegExp(searchQuery, "i") } },
+    ];
+  }
+  try {
+    await connectToDatabase();
+    const questions = await Question.find(query)
+      .populate({
+        path: "tags",
+        model: Tag,
+      })
+      .populate({
+        path: "author",
+        model: User,
+      })
+      .sort({ createdAt: -1 });
+    return { questions };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
+adding the integration in the Home page
+```tsx
+import { SearchParamsProps, TQuestion } from "@/types/types";
+
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { questions } = await getQuestions({
+    searchQuery: searchParams.q,
+  });
+```
+![Alt text](image-190.png)
+
 ### Implement Search functionality for the Community page
 ### Implement Search functionality for the Collection page
 ### Implement Search functionality for the Tags page
