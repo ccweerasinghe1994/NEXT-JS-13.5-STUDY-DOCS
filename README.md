@@ -96,7 +96,7 @@
     - [Show Top Questions ✅](#show-top-questions-)
     - [Show Popular Tags ✅](#show-popular-tags-)
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
-    - [Manage search state](#manage-search-state)
+    - [Manage search state ✅](#manage-search-state-)
     - [Implement Search functionality for the Home page](#implement-search-functionality-for-the-home-page)
     - [Implement Search functionality for the Community page](#implement-search-functionality-for-the-community-page)
     - [Implement Search functionality for the Collection page](#implement-search-functionality-for-the-collection-page)
@@ -9063,7 +9063,116 @@ export default RightSideBar;
 
 ## The Local Search Functionality 🔲
 
-### Manage search state
+### Manage search state ✅
+
+![Alt text](image-188.png)
+
+```shell
+npm install query-string  
+```
+util function
+```ts
+interface UrlQueryParams {
+  params: string;
+  key: string;
+  value: string | null;
+}
+
+export const formatUrlQuery = ({ key, value, params }: UrlQueryParams) => {
+  const currentUrl = qs.parse(params);
+  currentUrl[key] = value;
+  return qs.stringifyUrl(
+    {
+      url: window.location.pathname,
+      query: currentUrl,
+    },
+    {
+      skipNull: true,
+    },
+  );
+};
+
+export const removeKeysFromQuery = ({
+  keys,
+  params,
+}: {
+  keys: string[];
+  params: string;
+}) => {
+  const currentUrl = qs.parse(params);
+  keys.forEach((k) => {
+    delete currentUrl[k];
+  });
+  return qs.stringifyUrl(
+    {
+      url: window.location.pathname,
+      query: currentUrl,
+    },
+    {
+      skipNull: true,
+    },
+  );
+};
+```
+LocalSearch component
+```tsx
+"use client";
+
+import { FC, useEffect, useState } from "react";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatUrlQuery, removeKeysFromQuery } from "@/lib/utils";
+
+type TLocationProps = {
+  route: string;
+  iconPosition: "left" | "right";
+  imageSrc: string;
+  placeholder: string;
+  otherClasses?: string;
+};
+
+const LocalSearch: FC<TLocationProps> = ({
+  otherClasses,
+  route,
+  imageSrc,
+  iconPosition,
+  placeholder,
+}) => {
+  const router = useRouter();
+  const pathName = usePathname();
+  const searchParams = useSearchParams();
+
+  const query = searchParams.get("q");
+  const [search, setSearch] = useState(query || "");
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (search) {
+        const newUrl = formatUrlQuery({
+          params: searchParams.toString(),
+          key: "q",
+          value: search,
+        });
+        router.push(newUrl, { scroll: false });
+      } else {
+        if (pathName === route) {
+          const newUrl = removeKeysFromQuery({
+            params: searchParams.toString(),
+            keys: ["q"],
+          });
+          router.push(newUrl, { scroll: false });
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [search, pathName, router, searchParams, query, route]);
+
+```
+
+![Alt text](image-189.png)
+
+
 ### Implement Search functionality for the Home page
 ### Implement Search functionality for the Community page
 ### Implement Search functionality for the Collection page
