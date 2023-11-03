@@ -93,7 +93,7 @@
     - [Create Edit Question Page ✅](#create-edit-question-page-)
     - [Create Edit Profile Page ✅](#create-edit-profile-page-)
   - [Show Top Results 🔲](#show-top-results-)
-    - [Show Top Questions](#show-top-questions)
+    - [Show Top Questions ✅](#show-top-questions-)
     - [Show Popular Tags](#show-popular-tags)
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
     - [Manage search state](#manage-search-state)
@@ -8893,7 +8893,53 @@ export default Profile;
 
 ## Show Top Results 🔲
 
-### Show Top Questions
+### Show Top Questions ✅
+server action for top questions
+```ts
+export const getHotQuestions = async () => {
+  try {
+    await connectToDatabase();
+
+    const questions = await Question.find({})
+      .sort({
+        views: -1,
+        upvotes: -1,
+      })
+      .limit(5);
+    return questions as IQuestion[];
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+```
+![Alt text](image-186.png)
+
+use the action in the RighSideBar component
+
+```tsx
+
+const RightSideBar = async () => {
+  const hotQuestions = await getHotQuestions();
+  return (
+    <section
+      className={
+        "background-light900_dark200 light-border custom-scrollbar sticky right-0 top-0 flex h-screen w-[350px] flex-col overflow-y-auto border-l p-6 pt-36 shadow-light-300 dark:shadow-none max-xl:hidden"
+      }
+    >
+      <div className="">
+        <h3 className="h3-bold text-dark300_light900">Top Questions</h3>
+        <div className="mt-7 flex w-full flex-col gap-[30px]">
+          {hotQuestions.map((question) => {
+            return (
+              <Link
+                key={question._id}
+                href={`/question/${question._id}`}
+                className={
+                  "flex cursor-pointer items-center  justify-between gap-7"
+                }
+              >
+```            
 ### Show Popular Tags
 
 ## The Local Search Functionality 🔲
