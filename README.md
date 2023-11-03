@@ -8512,6 +8512,93 @@ export default EditDeleteAction;
 ![Alt text](image-183.png)
 
 ### Create Edit Question Page
+
+server action 
+```ts
+export const deleteQuestion = async (params: DeleteQuestionParams) => {
+  try {
+    await connectToDatabase();
+    const { questionId, path } = params;
+
+    await Question.deleteOne({ _id: questionId });
+    // delete answers associated with the question
+    await Answer.deleteMany({ question: questionId });
+
+    await Interaction.deleteMany({ question: questionId });
+
+    await Tag.updateMany(
+      {
+        questions: questionId,
+      },
+      {
+        $pull: {
+          questions: questionId,
+        },
+      },
+    );
+    revalidatePath(path);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+export const editQuestion = async (params: EditQuestionParams) => {
+  try {
+    await connectToDatabase();
+    const { title, content, questionId, path } = params;
+    const question = await Question.findById(questionId);
+
+    if (!question) {
+      throwError("Question not found");
+    }
+
+    question.title = title;
+    question.content = content;
+
+    await question.save();
+
+    revalidatePath(path);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+```
+```ts
+export const deleteAnswer = async (params: DeleteAnswerParams) => {
+  try {
+    await connectToDatabase();
+    const { answerId, path } = params;
+
+    const answer: IAnswer | null = await Answer.findById(answerId);
+
+    if (answer === null) {
+      throwError("Answer not found");
+      return;
+    }
+
+    await Answer.deleteOne({ _id: answerId });
+
+    await Question.updateMany(
+      { _id: answer.question },
+      {
+        $pull: { answers: answerId },
+      },
+    );
+
+    await Interaction.deleteMany({ answer: answerId });
+
+    revalidatePath(path);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+```
+
 ### Create Edit Profile Page
 
 
