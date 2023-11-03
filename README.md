@@ -83,11 +83,11 @@
     - [Create Question Details Page View ✅](#create-question-details-page-view-)
   - [Tag Details Page ✅](#tag-details-page-)
     - [Create a Tag Details Page ✅](#create-a-tag-details-page-)
-  - [Profile Page 🔲](#profile-page-)
+  - [Profile Page ✅](#profile-page-)
     - [Create Profile Page ✅](#create-profile-page-)
     - [Create User Stats UI ✅](#create-user-stats-ui-)
     - [Implement User Questions Tab ✅](#implement-user-questions-tab-)
-    - [Implement User Answers Tabs](#implement-user-answers-tabs)
+    - [Implement User Answers Tabs ✅](#implement-user-answers-tabs-)
   - [Edit\_Delete User Actions 🔲](#edit_delete-user-actions-)
     - [Implement Edit-Delete Question-Answer Component](#implement-edit-delete-question-answer-component)
     - [Create Edit Question Page](#create-edit-question-page)
@@ -7205,7 +7205,7 @@ export default Page;
 
 ![Alt text](image-169.png)
 
-## Profile Page 🔲
+## Profile Page ✅
 
 
 ### Create Profile Page ✅ 
@@ -7825,8 +7825,179 @@ const QuestionTab: FC<TQuestionTabProps> = async ({
 export default QuestionTab;
 ```
 
-### Implement User Answers Tabs
+### Implement User Answers Tabs ✅
 
+server action
+```ts
+export const getUserAnswers = async (params: GetUserStatsParams) => {
+  try {
+    await connectToDatabase();
+    const { page, pageSize, userId } = params;
+    const totalAnswers = await Answer.countDocuments({
+      author: userId,
+    });
+
+    const userAnswers: TAnswer[] = await Answer.find({
+      author: userId,
+    })
+      .sort({
+        upvotes: -1,
+      })
+      .populate({
+        path: "question",
+        model: Question,
+        select: "title _id",
+      })
+      .populate({
+        path: "author",
+        model: User,
+        select: "name _id picture clerkId",
+      });
+    return {
+      totalAnswers,
+      answers: userAnswers,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+AnswerCard 
+```tsx
+
+import { FC } from "react";
+import Link from "next/link";
+import { TAnswer } from "@/types/types";
+import { getTimStamp } from "@/lib/utils";
+import Metric from "@/components/shared/metric/Metric";
+
+type TAnswerCardProps = {
+  answer: TAnswer;
+  clerkId?: string | null;
+};
+
+const AnswerCard: FC<TAnswerCardProps> = ({
+  answer: { content, createdAt, downvotes, _id, upvotes, question, author },
+  clerkId,
+}) => {
+  return (
+    <Link
+      href={`/question/${question?._id}/#${_id}`}
+      className={"card-wrapper rounded-[10px] px-11 py-9"}
+    >
+      <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
+        <div className="">
+          <span className="subtle-regular text-dark400_light700 line-clamp-1 flex sm:hidden">
+            {getTimStamp(createdAt)}
+          </span>
+          <h3
+            className={
+              "sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1 flex-1"
+            }
+          >
+            {question.title}
+          </h3>
+        </div>
+      </div>
+
+      <div className="flex-between mt-6 w-full flex-wrap gap-3">
+        <Metric
+          imageUrl={author.picture}
+          alt={"user"}
+          value={author.name}
+          title={` - asked ${getTimStamp(createdAt)}`}
+          textStyles={"text-dark400_light700 body-medium"}
+          href={`/profile/${author._id}`}
+          isAuthor={true}
+        />
+        <Metric
+          imageUrl={"/assets/icons/like.svg"}
+          alt={"like"}
+          value={upvotes.length}
+          title={" Votes"}
+          textStyles={"text-dark400_light800 small-medium"}
+        />
+      </div>
+    </Link>
+  );
+};
+
+export default AnswerCard;
+```
+
+
+Answertab component
+```tsx
+import { FC } from "react";
+import { getUserAnswers } from "@/lib/actions/user.action";
+import AnswerCard from "@/components/cards/AnswerCard";
+
+type TAnswerTabProps = {
+  userId: string;
+  clerkId?: string | null;
+  searchParams: { [key: string]: string | undefined };
+};
+
+const AnswerTab: FC<TAnswerTabProps> = async ({
+  searchParams,
+  clerkId,
+  userId,
+}) => {
+  const result = await getUserAnswers({ userId, page: 1 });
+  console.log(result);
+  return (
+    <>
+      {result.answers.map((answer) => {
+        return (
+          <AnswerCard key={answer._id} answer={answer} clerkId={clerkId} />
+        );
+      })}
+    </>
+  );
+};
+
+export default AnswerTab;
+```
+
+small css fix
+```tsx
+      <div className="mt-10 flex gap-10">
+        <Tabs defaultValue="top-posts" className="flex-1">
+          <TabsList className={"background-light800_dark400 min-h-[42px] p-1"}>
+            <TabsTrigger className={"tab"} value="top-posts">
+              Top Posts
+            </TabsTrigger>
+            <TabsTrigger className={"tab"} value="answers">
+              Answers
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="top-posts">
+            <QuestionTab
+              userId={result.user._id}
+              searchParams={searchParams}
+              clerkId={clerkId}
+            />
+          </TabsContent>
+          <TabsContent value="answers" className={"flex w-full flex-col gap-6"}>
+            <AnswerTab
+              userId={result.user._id}
+              searchParams={searchParams}
+              clerkId={clerkId}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+};
+
+export default Page;
+```
+![Alt text](image-179.png)
+
+![Alt text](image-180.png)
 
 ## Edit_Delete User Actions 🔲
 
