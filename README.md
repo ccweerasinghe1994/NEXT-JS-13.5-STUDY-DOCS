@@ -85,8 +85,8 @@
     - [Create a Tag Details Page ✅](#create-a-tag-details-page-)
   - [Profile Page 🔲](#profile-page-)
     - [Create Profile Page ✅](#create-profile-page-)
-    - [Create User Stats UI](#create-user-stats-ui)
-    - [Implement User Questions Tab](#implement-user-questions-tab)
+    - [Create User Stats UI ✅](#create-user-stats-ui-)
+    - [Implement User Questions Tab ✅](#implement-user-questions-tab-)
     - [Implement User Answers Tabs](#implement-user-answers-tabs)
   - [Edit\_Delete User Actions 🔲](#edit_delete-user-actions-)
     - [Implement Edit-Delete Question-Answer Component](#implement-edit-delete-question-answer-component)
@@ -7519,7 +7519,7 @@ export default LeftSideBar;
 
 ![Alt text](image-173.png)
 
-### Create User Stats UI
+### Create User Stats UI ✅
 Stats component
 ```tsx
 import { FC } from "react";
@@ -7711,7 +7711,119 @@ Tabs component
 
 ![Alt text](image-176.png)
 
-### Implement User Questions Tab
+### Implement User Questions Tab ✅
+create server action 
+```ts
+export const getUserQuestions = async (params: GetUserStatsParams) => {
+  try {
+    await connectToDatabase();
+    const { page, pageSize, userId } = params;
+    const totalQuestions = await Question.countDocuments({
+      author: userId,
+    });
+
+    const userQuestions: TQuestion[] = await Question.find({
+      author: userId,
+    })
+      .sort({
+        views: -1,
+        upvotes: -1,
+      })
+      .populate({
+        path: "tags",
+        model: Tag,
+        select: "name _id",
+      })
+      .populate({
+        path: "author",
+        model: User,
+        select: "name _id picture clerkId",
+      });
+    return {
+      totalQuestions,
+      questions: userQuestions,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+adding answertab and question tab
+
+![Alt text](image-177.png)
+
+```tsx
+      <div className="mt-10 flex gap-10">
+        <Tabs defaultValue="top-posts" className="flex-1">
+          <TabsList className={"background-light800_dark400 min-h-[42px] p-1"}>
+            <TabsTrigger className={"tab"} value="top-posts">
+              Top Posts
+            </TabsTrigger>
+            <TabsTrigger className={"tab"} value="answers">
+              Answers
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="top-posts">
+            <QuestionTab
+              userId={result.user._id}
+              searchParams={searchParams}
+              clerkId={clerkId}
+            />
+          </TabsContent>
+          <TabsContent value="answers">
+            <AnswerTab
+              userId={result.user._id}
+              searchParams={searchParams}
+              clerkId={clerkId}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+};
+```
+
+![Alt text](image-178.png)
+
+question tab
+```tsx
+import { FC } from "react";
+import { getUserQuestions } from "@/lib/actions/user.action";
+import QuestionCard from "@/components/cards/QuestionCard";
+
+type TQuestionTabProps = {
+  userId: string;
+  clerkId?: string | null;
+  searchParams: { [key: string]: string | undefined };
+};
+
+const QuestionTab: FC<TQuestionTabProps> = async ({
+  userId,
+  searchParams,
+  clerkId,
+}) => {
+  const result = await getUserQuestions({ userId, page: 1 });
+  console.log(result);
+  return (
+    <div>
+      {result.questions.map((question) => {
+        return (
+          <QuestionCard
+            clerkId={clerkId}
+            question={question}
+            key={question._id}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+export default QuestionTab;
+```
 
 ### Implement User Answers Tabs
 
