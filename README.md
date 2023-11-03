@@ -92,9 +92,9 @@
     - [Implement Edit-Delete Question-Answer Component ✅](#implement-edit-delete-question-answer-component-)
     - [Create Edit Question Page ✅](#create-edit-question-page-)
     - [Create Edit Profile Page ✅](#create-edit-profile-page-)
-  - [Show Top Results 🔲](#show-top-results-)
+  - [Show Top Results ✅](#show-top-results-)
     - [Show Top Questions ✅](#show-top-questions-)
-    - [Show Popular Tags](#show-popular-tags)
+    - [Show Popular Tags ✅](#show-popular-tags-)
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
     - [Manage search state](#manage-search-state)
     - [Implement Search functionality for the Home page](#implement-search-functionality-for-the-home-page)
@@ -8891,7 +8891,7 @@ export default Profile;
 
 ![Alt text](image-185.png)
 
-## Show Top Results 🔲
+## Show Top Results ✅
 
 ### Show Top Questions ✅
 server action for top questions
@@ -8940,7 +8940,126 @@ const RightSideBar = async () => {
                 }
               >
 ```            
-### Show Popular Tags
+### Show Popular Tags ✅
+
+get polular tags action
+
+```ts
+// This function returns the ten most popular tags
+
+export const getPopularTags = async () => {
+  try {
+    await connectToDatabase();
+    const tags = await Tag.aggregate([
+      {
+        $project: { name: 1, numberOsQuestions: { $size: "$questions" } },
+      },
+      { $sort: { numberOsQuestions: -1 } },
+      { $limit: 10 },
+    ]);
+    return tags;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+```
+Here is the explanation for the code above:
+1. First, we connect to the database using the connectToDatabase function we created in the previous step.
+2. Then, we aggregate all the tags using the aggregate function of the mongoose object.
+3. In the first stage of the aggregation, we project the name and the size of the questions array of each tag. We use the $size aggregation operator to get the number of questions of each tag.
+4. In the second stage, we sort the tags by the number of questions in descending order. This way, we get the most popular tags first.
+5. Finally, we limit the results to 10 tags.
+
+
+here we are using the server action in the RightSideBar component
+```tsx
+import Link from "next/link";
+import Image from "next/image";
+import RenderTag from "@/components/shared/tags/RenderTag";
+import { getHotQuestions } from "@/lib/actions/question.action";
+import { getPopularTags } from "@/lib/actions/tag.action";
+
+const popluarTags = [
+  {
+    _id: 1,
+    title: "React",
+    totalQuestions: 100,
+  },
+  {
+    _id: 2,
+    title: "Next.js",
+    totalQuestions: 42,
+  },
+  {
+    _id: 3,
+    title: "React Query",
+    totalQuestions: 10,
+  },
+];
+const RightSideBar = async () => {
+  const hotQuestions = await getHotQuestions();
+  const popluarTags = await getPopularTags();
+  console.log(popluarTags);
+  return (
+    <section
+      className={
+        "background-light900_dark200 light-border custom-scrollbar sticky right-0 top-0 flex h-screen w-[350px] flex-col overflow-y-auto border-l p-6 pt-36 shadow-light-300 dark:shadow-none max-xl:hidden"
+      }
+    >
+      <div className="">
+        <h3 className="h3-bold text-dark300_light900">Top Questions</h3>
+        <div className="mt-7 flex w-full flex-col gap-[30px]">
+          {hotQuestions.map((question) => {
+            return (
+              <Link
+                key={question._id}
+                href={`/question/${question._id}`}
+                className={
+                  "flex cursor-pointer items-center  justify-between gap-7"
+                }
+              >
+                <p className={"body-medium text-dark500_light700"}>
+                  {question.title}
+                </p>
+                <Image
+                  src={"/assets/icons/chevron-right.svg"}
+                  alt={"chevron-right"}
+                  width={20}
+                  height={20}
+                  className={"invert-colors"}
+                />
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-16">
+        <h3 className="h3-bold text-dark300_light900">Popular Tags</h3>
+        <div className="mt-7 flex flex-col gap-4">
+          {popluarTags.map((tag) => {
+            return (
+              <RenderTag
+                _id={tag._id}
+                totalQuestions={tag.numberOsQuestions}
+                name={tag.name}
+                showCount
+                key={tag._id}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default RightSideBar;
+```
+
+![Alt text](image-187.png)
+
 
 ## The Local Search Functionality 🔲
 
