@@ -104,8 +104,8 @@
   - [The Filters 🔲](#the-filters-)
     - [Manage Filter state ✅](#manage-filter-state-)
     - [Integrate Filters on Home page ✅](#integrate-filters-on-home-page-)
-    - [Integrate Filters on the Community page](#integrate-filters-on-the-community-page)
-    - [Integrate Filters on the Collection page](#integrate-filters-on-the-collection-page)
+    - [Integrate Filters on the Community page ✅](#integrate-filters-on-the-community-page-)
+    - [Integrate Filters on the Collection page ✅](#integrate-filters-on-the-collection-page-)
     - [Integrate Filters for Tags and Answers](#integrate-filters-for-tags-and-answers)
   - [The Pagination 🔲](#the-pagination-)
     - [Create Pagination component](#create-pagination-component)
@@ -9608,8 +9608,226 @@ const HomeFilter = () => {
   };
 ```
 
-### Integrate Filters on the Community page
-### Integrate Filters on the Collection page
+### Integrate Filters on the Community page ✅
+filter componet
+```tsx
+type TFilterProps = {
+  filters: TFilterItem[];
+  otherClasses?: string;
+  containerClasses?: string;
+};
+
+const Filter: FC<TFilterProps> = ({
+  filters,
+  otherClasses,
+  containerClasses,
+}) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const paramsFilter = searchParams.get("filter");
+  const handleUpdateParams = (value: string) => {
+    const newUrl = formatUrlQuery({
+      params: searchParams.toString(),
+      key: "filter",
+      value,
+    });
+    router.push(newUrl, { scroll: false });
+  };
+
+  return (
+    <div className={`relative ${containerClasses}`}>
+      <Select
+        onValueChange={handleUpdateParams}
+        defaultValue={paramsFilter || undefined}
+      >
+        <SelectTrigger
+          className={`${otherClasses} body-regular light-border background-light800_dark300 text-dark500_light700 border px-5 py-2.5`}
+        >
+          <div className={"line-clamp-1 flex-1 text-left"}>
+            <SelectValue placeholder="Select a Filter" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {filters.map((filter) => (
+              <SelectItem key={filter.value} value={filter.value}>
+                {filter.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
+
+export default Filter;
+```
+
+community
+```tsx
+const CommunityPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllUsers({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+  });
+  return (
+```
+
+server action 
+```ts
+export const getAllUsers = async (params: GetAllUsersParams) => {
+  try {
+    await connectToDatabase();
+    const { searchQuery, filter } = params;
+    console.log(searchQuery);
+    const query: FilterQuery<typeof User> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        {
+          name: { $regex: new RegExp(searchQuery, "i") },
+          username: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    let sortOptions = {};
+
+    switch (filter as TFilterOptions) {
+      case "new_users":
+        sortOptions = {
+          joinedAt: -1,
+        };
+        break;
+      case "old_users":
+        sortOptions = {
+          joinedAt: 1,
+        };
+        break;
+      case "top_contributors":
+        sortOptions = {
+          reputation: -1,
+        };
+        break;
+      default:
+        break;
+    }
+
+    const users = await User.find(query).sort(sortOptions);
+
+    return {
+      users,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+```
+
+### Integrate Filters on the Collection page ✅
+
+collection page
+
+```tsx
+
+const CollectionPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const { userId } = auth();
+
+  if (!userId) return null;
+
+  const { questions } = await getSavedQuestion({
+    clerkId: userId,
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+  });
+```
+
+server action
+```ts
+export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
+  try {
+    await connectToDatabase();
+    const { searchQuery, clerkId, filter } = params;
+    const query: FilterQuery<typeof Question> = {};
+    if (searchQuery) {
+      query.$or = [
+        {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    let filterOptions = {};
+
+    switch (filter as TFilterUserOptions) {
+      case "most_recent":
+        filterOptions = {
+          createdAt: -1,
+        };
+        break;
+      case "oldest":
+        filterOptions = {
+          createdAt: 1,
+        };
+        break;
+      case "most_voted":
+        filterOptions = {
+          upvotes: -1,
+        };
+        break;
+      case "most_viewed":
+        filterOptions = {
+          views: -1,
+        };
+        break;
+      case "most_answered":
+        filterOptions = {
+          answers: -1,
+        };
+        break;
+      default:
+        break;
+    }
+
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      match: query,
+      options: {
+        sort: filterOptions,
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "name _id",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "name _id clerkId picture",
+          },
+        ],
+      },
+    });
+
+    if (!user) {
+      throwError("User not found");
+    }
+
+    const savedQuestions = user.saved;
+
+    return {
+      questions: savedQuestions,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
 ### Integrate Filters for Tags and Answers
 
 ## The Pagination 🔲
