@@ -9882,6 +9882,125 @@ const TagsPage: FC<SearchParamsProps> = async ({ searchParams }) => {
     filter: searchParams.filter,
   });
 ```
+adding filter to all answers
+
+```tsx
+const AllAnswers: FC<TAllAnswerProps> = async ({
+  totalAnswers,
+  userId,
+  questionId,
+  page,
+  filter,
+}) => {
+  const result = await getAnswerByQuestionId({
+    questionId,
+    page: page || 1,
+    sortBy: filter,
+  });
+```
+
+get answerById server action
+```ts
+type TAllAnswersSortBy = "highestUpvotes" | "lowestUpvotes" | "recent" | "old";
+
+export const getAnswerByQuestionId = async (params: GetAnswersParams) => {
+  const { questionId, sortBy } = params;
+
+  let sortObject: Partial<Record<keyof IAnswer, SortOrder>> = {};
+
+  switch (sortBy as TAllAnswersSortBy) {
+    case "highestUpvotes":
+      sortObject = {
+        upvotes: -1,
+      };
+      break;
+    case "lowestUpvotes":
+      sortObject = {
+        upvotes: 1,
+      };
+      break;
+    case "recent":
+      sortObject = {
+        createdAt: -1,
+      };
+      break;
+    case "old":
+      sortObject = {
+        createdAt: 1,
+      };
+      break;
+    default:
+      break;
+  }
+
+  try {
+    const answers = await Answer.find({
+      question: questionId,
+    })
+      .populate({
+        path: "author",
+        model: "User",
+        select: "_id clerkId picture name",
+      })
+      .sort(sortObject);
+    return {
+      answers,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+```
+
+Question id page
+
+```tsx
+import Answer from "@/components/forms/Answer";
+import AllAnswers from "@/components/shared/AllAnswers/AllAnswers";
+import Metric from "@/components/shared/metric/Metric";
+import ParseHTML from "@/components/shared/parseHtml/ParseHTML";
+import RenderTag from "@/components/shared/tags/RenderTag";
+import { getQuestionById } from "@/lib/actions/question.action";
+import { getUserById } from "@/lib/actions/user.action";
+import { getTimStamp } from "@/lib/utils";
+import { auth } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
+import { FC } from "react";
+import Votes from "@/components/shared/votes/Votes";
+import { URLProps } from "@/types/types";
+
+const Page: FC<URLProps> = async ({ params, searchParams }) => {
+  const { question } = await getQuestionById({ questionId: params.id });
+  const { userId: clerkId } = auth();
+  let mongoUser;
+  if (clerkId) {
+    mongoUser = await getUserById({ userId: clerkId });
+  }
+  return (
+    <>
+      ....
+      <AllAnswers
+        questionId={question._id}
+        userId={mongoUser?._id ?? ""}
+        totalAnswers={question.answers.length}
+        page={Number(searchParams?.page)}
+        filter={searchParams?.filter}
+      />
+      <Answer
+        question={question.content}
+        questionId={JSON.stringify(question._id)}
+        authorId={JSON.stringify(mongoUser?._id ?? "")}
+      />
+    </>
+  );
+};
+
+export default Page;
+```
+![Alt text](image-198.png)
+![Alt text](image-197.png)
 
 ## The Pagination 🔲
 
