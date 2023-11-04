@@ -103,7 +103,7 @@
     - [Implement Search functionality for the Tags page ✅](#implement-search-functionality-for-the-tags-page-)
   - [The Filters 🔲](#the-filters-)
     - [Manage Filter state ✅](#manage-filter-state-)
-    - [Integrate Filters on Home page](#integrate-filters-on-home-page)
+    - [Integrate Filters on Home page ✅](#integrate-filters-on-home-page-)
     - [Integrate Filters on the Community page](#integrate-filters-on-the-community-page)
     - [Integrate Filters on the Collection page](#integrate-filters-on-the-collection-page)
     - [Integrate Filters for Tags and Answers](#integrate-filters-for-tags-and-answers)
@@ -9448,6 +9448,9 @@ export const getQuestionByTagId = async (params: GetQuestionsByTagIdParams) => {
 ## The Filters 🔲
 
 ### Manage Filter state ✅
+
+![Alt text](image-194.png)
+
 HomeFilters component
 ```tsx
 "use client";
@@ -9503,7 +9506,108 @@ const HomeFilter = () => {
 };
 export default HomeFilter;
 ```
-### Integrate Filters on Home page
+### Integrate Filters on Home page ✅
+server action
+```ts
+export async function getQuestions(params: IGetQuestionsParams) {
+  const { searchQuery, filter } = params;
+
+  const query: FilterQuery<typeof Question> = {};
+
+  if (searchQuery) {
+    query.$or = [
+      { title: { $regex: new RegExp(searchQuery, "i") } },
+      { content: { $regex: new RegExp(searchQuery, "i") } },
+    ];
+  }
+
+  let sortOptions = {};
+  const typedFilter = filter as TFilterValueType;
+  switch (typedFilter) {
+    case "newest":
+      sortOptions = { createdAt: -1 };
+      break;
+    case "recommended":
+      sortOptions = { views: -1 };
+      break;
+    case "frequent":
+      sortOptions = { answers: -1 };
+      break;
+    case "unanswered":
+      query.answers = { $size: 0 };
+      break;
+    default:
+      break;
+  }
+
+  try {
+    await connectToDatabase();
+    const questions = await Question.find(query)
+      .populate({
+        path: "tags",
+        model: Tag,
+      })
+      .populate({
+        path: "author",
+        model: User,
+      })
+      .sort(sortOptions);
+    return { questions };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
+![Alt text](image-195.png)
+
+Home page
+```tsx
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { questions } = await getQuestions({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+  });
+```
+
+HomeFilter component
+
+```tsx
+"use client";
+import { HOME_PAGE_FILTERS } from "@/constants/filters";
+import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { formatUrlQuery } from "@/lib/utils";
+import { TFilterValueType } from "@/types/types";
+
+const HomeFilter = () => {
+  const searchParams = useSearchParams();
+  const [active, setActive] = useState<TFilterValueType | undefined>(
+    "recommended",
+  );
+  const router = useRouter();
+  const handleTypeClick = (type: TFilterValueType) => {
+    if (active === type) {
+      setActive(undefined);
+      const newUrl = formatUrlQuery({
+        params: searchParams.toString(),
+        key: "filter",
+        value: null,
+      });
+      router.push(newUrl, { scroll: false });
+    } else {
+      setActive(type);
+      const newUrl = formatUrlQuery({
+        params: searchParams.toString(),
+        key: "filter",
+        value: type ?? null,
+      });
+      router.push(newUrl, { scroll: false });
+    }
+  };
+```
+
 ### Integrate Filters on the Community page
 ### Integrate Filters on the Collection page
 ### Integrate Filters for Tags and Answers
