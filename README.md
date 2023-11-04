@@ -98,7 +98,7 @@
   - [The Local Search Functionality 🔲](#the-local-search-functionality-)
     - [Manage search state ✅](#manage-search-state-)
     - [Implement Search functionality for the Home page ✅](#implement-search-functionality-for-the-home-page-)
-    - [Implement Search functionality for the Community page](#implement-search-functionality-for-the-community-page)
+    - [Implement Search functionality for the Community page ✅](#implement-search-functionality-for-the-community-page-)
     - [Implement Search functionality for the Collection page](#implement-search-functionality-for-the-collection-page)
     - [Implement Search functionality for the Tags page](#implement-search-functionality-for-the-tags-page)
   - [The Filters 🔲](#the-filters-)
@@ -9218,7 +9218,50 @@ export default async function Home({ searchParams }: SearchParamsProps) {
 ```
 ![Alt text](image-190.png)
 
-### Implement Search functionality for the Community page
+### Implement Search functionality for the Community page ✅
+
+server component
+```ts
+export const getAllUsers = async (params: GetAllUsersParams) => {
+  try {
+    const { searchQuery } = params;
+    console.log(searchQuery);
+    const query: FilterQuery<typeof User> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        {
+          name: { $regex: new RegExp(searchQuery, "i") },
+          username: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    await connectToDatabase();
+    const users = await User.find(query).sort({
+      createdAt: -1,
+    });
+
+    return {
+      users,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+let's add the integration in the community page
+```tsx
+import { SearchParamsProps } from "@/types/types";
+import { FC } from "react";
+
+const CommunityPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllUsers({
+    searchQuery: searchParams.q,
+  });
+```
 ### Implement Search functionality for the Collection page
 ### Implement Search functionality for the Tags page
 
