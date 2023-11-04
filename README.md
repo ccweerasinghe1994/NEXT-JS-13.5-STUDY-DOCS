@@ -109,7 +109,7 @@
     - [Integrate Filters for Tags and Answers ✅](#integrate-filters-for-tags-and-answers-)
   - [The Pagination 🔲](#the-pagination-)
     - [Create Pagination component ✅](#create-pagination-component-)
-    - [Implement pagination on the Home page](#implement-pagination-on-the-home-page)
+    - [Implement pagination on the Home page ✅](#implement-pagination-on-the-home-page-)
     - [Implement pagination for the rest of the pages](#implement-pagination-for-the-rest-of-the-pages)
   - [Global Search 🔲](#global-search--1)
     - [Create the Global Search UI](#create-the-global-search-ui)
@@ -10147,7 +10147,75 @@ export default async function Home({ searchParams }: SearchParamsProps) {
 ```
 ![Alt text](image-200.png)
 
-### Implement pagination on the Home page
+### Implement pagination on the Home page ✅
+
+![Alt text](image-201.png)
+Home page
+```tsx
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { questions, isNext } = await getQuestions({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
+    pageSize: 2,
+  });
+```
+server action
+```ts
+export async function getQuestions(params: IGetQuestionsParams) {
+  try {
+    await connectToDatabase();
+
+    const { searchQuery, filter, page = 1, pageSize = 2 } = params;
+    const query: FilterQuery<typeof Question> = {};
+    const skipAmount = (page - 1) * pageSize;
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { content: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
+    let sortOptions = {};
+    const typedFilter = filter as TFilterValueType;
+    switch (typedFilter) {
+      case "newest":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "recommended":
+        sortOptions = { views: -1 };
+        break;
+      case "frequent":
+        sortOptions = { answers: -1 };
+        break;
+      case "unanswered":
+        query.answers = { $size: 0 };
+        break;
+      default:
+        break;
+    }
+
+    const questions = await Question.find(query)
+      .populate({
+        path: "tags",
+        model: Tag,
+      })
+      .populate({
+        path: "author",
+        model: User,
+      })
+      .sort(sortOptions)
+      .limit(pageSize)
+      .skip(skipAmount);
+    const totalQuestions = await Question.countDocuments(query);
+    const isNext = totalQuestions > skipAmount + questions.length;
+    return { questions, isNext };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
 ### Implement pagination for the rest of the pages
 
 ## Global Search 🔲
