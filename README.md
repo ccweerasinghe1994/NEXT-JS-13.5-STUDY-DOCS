@@ -100,7 +100,7 @@
     - [Implement Search functionality for the Home page ✅](#implement-search-functionality-for-the-home-page-)
     - [Implement Search functionality for the Community page ✅](#implement-search-functionality-for-the-community-page-)
     - [Implement Search functionality for the Collection page ✅](#implement-search-functionality-for-the-collection-page-)
-    - [Implement Search functionality for the Tags page](#implement-search-functionality-for-the-tags-page)
+    - [Implement Search functionality for the Tags page ✅](#implement-search-functionality-for-the-tags-page-)
   - [The Filters 🔲](#the-filters-)
     - [Manage Filter state](#manage-filter-state)
     - [Integrate Filters on Home page](#integrate-filters-on-home-page)
@@ -9350,9 +9350,100 @@ export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
   }
 };
 ```
-### Implement Search functionality for the Tags page
+### Implement Search functionality for the Tags page ✅
+![Alt text](image-192.png)
+![Alt text](image-191.png)
 
+tags id page 
 
+![Alt text](image-193.png)
+
+```tsx
+import { SearchParamsProps } from "@/types/types";
+
+const TagsPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllTags({
+    searchQuery: searchParams.q,
+  });
+```
+
+server action 
+```ts
+export const getAllTags = async (params: GetAllTagsParams) => {
+  const { searchQuery } = params;
+  const query: FilterQuery<typeof Tag> = {};
+  if (searchQuery) {
+    query.$or = [
+      {
+        name: { $regex: new RegExp(searchQuery, "i") },
+      },
+    ];
+  }
+  try {
+    await connectToDatabase();
+    const tags = await Tag.find(query);
+    return { tags };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const getQuestionByTagId = async (params: GetQuestionsByTagIdParams) => {
+  try {
+    await connectToDatabase();
+    const { tagId, searchQuery } = params;
+    const query: FilterQuery<typeof Question> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    const tag = await Tag.findOne({
+      _id: tagId,
+    }).populate({
+      path: "questions",
+      model: Question,
+      match: query,
+      options: {
+        sort: {
+          createdAt: -1,
+        },
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "name _id",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "name _id clerkId picture",
+          },
+        ],
+      },
+    });
+
+    if (!tag) {
+      throwError("Tag not found");
+    }
+
+    const questions = tag.questions;
+
+    return {
+      tagTitle: tag.name,
+      questions,
+    };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+```
 
 ## The Filters 🔲
 
