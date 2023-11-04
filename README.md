@@ -99,7 +99,7 @@
     - [Manage search state ✅](#manage-search-state-)
     - [Implement Search functionality for the Home page ✅](#implement-search-functionality-for-the-home-page-)
     - [Implement Search functionality for the Community page ✅](#implement-search-functionality-for-the-community-page-)
-    - [Implement Search functionality for the Collection page](#implement-search-functionality-for-the-collection-page)
+    - [Implement Search functionality for the Collection page ✅](#implement-search-functionality-for-the-collection-page-)
     - [Implement Search functionality for the Tags page](#implement-search-functionality-for-the-tags-page)
   - [The Filters 🔲](#the-filters-)
     - [Manage Filter state](#manage-filter-state)
@@ -9262,7 +9262,94 @@ const CommunityPage: FC<SearchParamsProps> = async ({ searchParams }) => {
     searchQuery: searchParams.q,
   });
 ```
-### Implement Search functionality for the Collection page
+### Implement Search functionality for the Collection page ✅
+let's add the integration in the collection page
+```tsx
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { QuestionFilters } from "@/constants/filters";
+import NoResult from "@/components/shared/noResult/NoResult";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { SearchParamsProps, TQuestion } from "@/types/types";
+import { getSavedQuestion } from "@/lib/actions/user.action";
+import { auth } from "@clerk/nextjs";
+import { FC } from "react";
+
+const CollectionPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const { userId } = auth();
+
+  if (!userId) return null;
+
+  const { questions } = await getSavedQuestion({
+    clerkId: userId,
+    searchQuery: searchParams.q,
+  });
+  return (
+    <>
+      <h1 className={"h1-bold text-dark100_light900"}>Saved Questions</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/collection"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+```
+
+server action
+```ts
+export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
+  try {
+    await connectToDatabase();
+    const { searchQuery, clerkId } = params;
+    const query: FilterQuery<typeof Question> = {};
+    if (searchQuery) {
+      query.$or = [
+        {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      match: query,
+      options: {
+        sort: {
+          createdAt: -1,
+        },
+        populate: [
+          {
+            path: "tags",
+            model: Tag,
+            select: "name _id",
+          },
+          {
+            path: "author",
+            model: User,
+            select: "name _id clerkId picture",
+          },
+        ],
+      },
+    });
+
+    if (!user) {
+      throwError("User not found");
+    }
+
+    const savedQuestions = user.saved;
+
+    return {
+      questions: savedQuestions,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
 ### Implement Search functionality for the Tags page
 
 
