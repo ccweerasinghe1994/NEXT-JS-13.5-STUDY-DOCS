@@ -106,7 +106,7 @@
     - [Integrate Filters on Home page ✅](#integrate-filters-on-home-page-)
     - [Integrate Filters on the Community page ✅](#integrate-filters-on-the-community-page-)
     - [Integrate Filters on the Collection page ✅](#integrate-filters-on-the-collection-page-)
-    - [Integrate Filters for Tags and Answers](#integrate-filters-for-tags-and-answers)
+    - [Integrate Filters for Tags and Answers ✅](#integrate-filters-for-tags-and-answers-)
   - [The Pagination 🔲](#the-pagination-)
     - [Create Pagination component](#create-pagination-component)
     - [Implement pagination on the Home page](#implement-pagination-on-the-home-page)
@@ -9828,7 +9828,60 @@ export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
 };
 ```
 
-### Integrate Filters for Tags and Answers
+### Integrate Filters for Tags and Answers ✅
+tags page
+```ts
+type TGetAllTags = "popular" | "recent" | "name" | "old";
+export const getAllTags = async (params: GetAllTagsParams) => {
+  const { searchQuery, filter } = params;
+  const query: FilterQuery<typeof Tag> = {};
+  if (searchQuery) {
+    query.$or = [
+      {
+        name: { $regex: new RegExp(searchQuery, "i") },
+      },
+    ];
+  }
+
+  let sortObject = {};
+
+  switch (filter as TGetAllTags) {
+    case "popular":
+      sortObject = { questions: -1 };
+      break;
+    case "recent":
+      sortObject = { createdOn: -1 };
+      break;
+    case "name":
+      sortObject = { name: 1 };
+      break;
+    case "old":
+      sortObject = { createdOn: 1 };
+      break;
+    default:
+      break;
+  }
+
+  try {
+    await connectToDatabase();
+    const tags = await Tag.find(query).sort(sortObject);
+    return { tags };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+![Alt text](image-196.png)
+
+```tsx
+const TagsPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllTags({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+  });
+```
 
 ## The Pagination 🔲
 
