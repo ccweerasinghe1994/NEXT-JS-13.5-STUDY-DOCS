@@ -10217,6 +10217,347 @@ export async function getQuestions(params: IGetQuestionsParams) {
 }
 ```
 ### Implement pagination for the rest of the pages
+do the same thing to all the other pages
+
+Collection Page
+```tsx
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { QuestionFilters } from "@/constants/filters";
+import NoResult from "@/components/shared/noResult/NoResult";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { SearchParamsProps, TQuestion } from "@/types/types";
+import { getSavedQuestion } from "@/lib/actions/user.action";
+import { auth } from "@clerk/nextjs";
+import { FC } from "react";
+import Pagination from "@/components/shared/pagination/Pagination";
+
+const CollectionPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const { userId } = auth();
+
+  if (!userId) return null;
+
+  const { questions, isNext } = await getSavedQuestion({
+    clerkId: userId,
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
+    pageSize: 2,
+  });
+  return (
+    <>
+      <h1 className={"h1-bold text-dark100_light900"}>Saved Questions</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/collection"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={QuestionFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map((question: TQuestion) => (
+            // <QuestionCard key={question._id} question={question} />
+            <QuestionCard key={question._id} question={question} />
+          ))
+        ) : (
+          <NoResult
+            title={"There is no saved questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+      <div className="mt-10">
+        <Pagination
+          pageNumbers={searchParams?.page ? +searchParams?.page : 1}
+          isNext={isNext}
+        />
+      </div>
+    </>
+  );
+};
+
+export default CollectionPage;
+
+```
+server action
+```ts
+export const getSavedQuestion = async (params: GetSavedQuestionsParams) => {
+  try {
+    await connectToDatabase();
+    const { searchQuery, clerkId, filter, pageSize = 2, page = 1 } = params;
+    const skipAmount = (page - 1) * pageSize;
+    const query: FilterQuery<typeof Question> = {};
+    if (searchQuery) {
+      query.$or = [
+        {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    let filterOptions = {};
+
+    switch (filter as TFilterUserOptions) {
+      case "most_recent":
+        filterOptions = {
+          createdAt: -1,
+        };
+        break;
+      case "oldest":
+        filterOptions = {
+          createdAt: 1,
+        };
+        break;
+      case "most_voted":
+        filterOptions = {
+          upvotes: -1,
+        };
+        break;
+      case "most_viewed":
+        filterOptions = {
+          views: -1,
+        };
+        break;
+      case "most_answered":
+        filterOptions = {
+          answers: -1,
+        };
+        break;
+      default:
+        break;
+    }
+
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      match: query,
+      populate: [
+        {
+          path: "tags",
+          model: Tag,
+          select: "name _id",
+        },
+        {
+          path: "author",
+          model: User,
+          select: "name _id clerkId picture",
+        },
+      ],
+      options: {
+        sort: filterOptions,
+        limit: pageSize + 1,
+        skip: skipAmount,
+      },
+    });
+
+    if (!user) {
+      throwError("User not found");
+    }
+
+    const savedQuestions = user.saved;
+
+    const isNext = user.saved.length > pageSize;
+    return {
+      questions: savedQuestions,
+      isNext,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+Community Page
+```tsx
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { UserFilters } from "@/constants/filters";
+import { getAllUsers } from "@/lib/actions/user.action";
+import Link from "next/link";
+import UserCard from "@/components/cards/UserCard";
+import { SearchParamsProps } from "@/types/types";
+import { FC } from "react";
+import Pagination from "@/components/shared/pagination/Pagination";
+
+const CommunityPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllUsers({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
+    pageSize: 10,
+  });
+  return (
+    <>
+      <h1 className={"h1-bold text-dark100_light900"}>All Users</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/community"}
+          iconPosition={"left"}
+          placeholder={"Search for amazing minds"}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={UserFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <section className={"mt-12 flex flex-wrap gap-4 "}>
+        {results.users.length > 0 ? (
+          results.users.map((user) => <UserCard key={user._id} user={user} />)
+        ) : (
+          <div
+            className={
+              "paragraph-regular text-dark200_light800 mx-auto max-w-4xl text-center"
+            }
+          >
+            <p>No users Yet</p>
+            <Link
+              href={"/sign-up"}
+              className={"mt-2 font-bold text-accent-blue"}
+            >
+              Join To Be The First
+            </Link>
+          </div>
+        )}
+      </section>
+      <div className="mt-10">
+        <Pagination
+          pageNumbers={searchParams?.page ? +searchParams?.page : 1}
+          isNext={results.isNext}
+        />
+      </div>
+    </>
+  );
+};
+
+export default CommunityPage;
+
+```
+Tags Page
+
+```tsx
+import { FC } from "react";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { TagFilters } from "@/constants/filters";
+import { getAllTags } from "@/lib/actions/tag.action";
+import TagCard from "@/components/cards/TagCard";
+import NoResult from "@/components/shared/noResult/NoResult";
+import { SearchParamsProps } from "@/types/types";
+import Pagination from "@/components/shared/pagination/Pagination";
+
+const TagsPage: FC<SearchParamsProps> = async ({ searchParams }) => {
+  const results = await getAllTags({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
+    pageSize: 2,
+  });
+  return (
+    <div>
+      <h1 className={"h1-bold text-dark100_light900"}>Tags</h1>
+
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/tags"}
+          iconPosition={"left"}
+          placeholder={"Search for amazing minds"}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={TagFilters}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+        />
+      </div>
+      <section className={"mt-12 flex flex-wrap gap-4 "}>
+        {results.tags.length > 0 ? (
+          results.tags.map((tag) => <TagCard key={tag._id} tag={tag} />)
+        ) : (
+          <NoResult
+            title={"No Tags Found"}
+            description={"It seems that there are no tags yet"}
+            LinkText={"Ask a question"}
+            LinkHref={"/ask-question"}
+          />
+        )}
+      </section>
+      <div className="mt-10">
+        <Pagination
+          pageNumbers={searchParams.page ? +searchParams.page : 1}
+          isNext={results.isNext}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default TagsPage;
+
+```
+```ts
+export const getAllTags = async (params: GetAllTagsParams) => {
+  try {
+    const { searchQuery, filter, pageSize = 2, page = 1 } = params;
+    const skip = (page - 1) * pageSize;
+    const query: FilterQuery<ITag> = {};
+    if (searchQuery) {
+      query.$or = [
+        {
+          name: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    let sortObject = {};
+
+    switch (filter as TGetAllTags) {
+      case "popular":
+        sortObject = { questions: -1 };
+        break;
+      case "recent":
+        sortObject = { createdOn: -1 };
+        break;
+      case "name":
+        sortObject = { name: 1 };
+        break;
+      case "old":
+        sortObject = { createdOn: 1 };
+        break;
+      default:
+        break;
+    }
+
+    await connectToDatabase();
+    const tags = await Tag.find(query)
+      .sort(sortObject)
+      .limit(pageSize)
+      .skip(skip);
+    const total = await Tag.countDocuments(query);
+    const isNext = total > skip + tags.length;
+    return { tags, isNext };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+continue it for the rest of the pages
 
 ## Global Search 🔲
 ### Create the Global Search UI
