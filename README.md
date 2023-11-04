@@ -108,7 +108,7 @@
     - [Integrate Filters on the Collection page ✅](#integrate-filters-on-the-collection-page-)
     - [Integrate Filters for Tags and Answers ✅](#integrate-filters-for-tags-and-answers-)
   - [The Pagination 🔲](#the-pagination-)
-    - [Create Pagination component](#create-pagination-component)
+    - [Create Pagination component ✅](#create-pagination-component-)
     - [Implement pagination on the Home page](#implement-pagination-on-the-home-page)
     - [Implement pagination for the rest of the pages](#implement-pagination-for-the-rest-of-the-pages)
   - [Global Search 🔲](#global-search--1)
@@ -10004,7 +10004,149 @@ export default Page;
 
 ## The Pagination 🔲
 
-### Create Pagination component
+### Create Pagination component ✅
+
+Pagination component
+
+```tsx
+"use client";
+import { FC } from "react";
+import { Button } from "@/components/ui/button";
+import { formatUrlQuery } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+
+type TPaginationProps = {
+  pageNumbers: number;
+  isNext: boolean;
+};
+
+const Pagination: FC<TPaginationProps> = ({ isNext, pageNumbers }) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const handleNavigation = (direction: "previous" | "next") => {
+    const nextPageNumber =
+      direction === "previous" ? pageNumbers - 1 : pageNumbers + 1;
+    const newUrl = formatUrlQuery({
+      params: searchParams.toString(),
+      key: "page",
+      value: nextPageNumber.toString(),
+    });
+
+    router.push(newUrl);
+  };
+  return (
+    <div className={"flex w-full items-center justify-center gap-2"}>
+      <Button
+        className={
+          "light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border"
+        }
+        onClick={() => handleNavigation("previous")}
+        disabled={pageNumbers === 1}
+      >
+        <p className="text-dark200_light800 body-medium">Prev</p>
+      </Button>
+      <div className="flex items-center justify-center rounded-md bg-primary-500 px-3.5 py-2">
+        <p className="body-semibold text-light-900">{pageNumbers}</p>
+      </div>
+      <Button
+        className={
+          "light-border-2 btn flex min-h-[36px] items-center justify-center gap-2 border"
+        }
+        onClick={() => handleNavigation("next")}
+        disabled={!isNext}
+      >
+        <p className="text-dark200_light800 body-medium">Next</p>
+      </Button>
+    </div>
+  );
+};
+
+export default Pagination;
+```
+![Alt text](image-199.png)
+
+HomePage component
+```tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Filter from "@/components/shared/filters/Filter";
+import { HOME_PAGE_FILTERS } from "@/constants/filters";
+import HomeFilter from "@/components/home/HomeFilter";
+import NoResult from "@/components/shared/noResult/NoResult";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { getQuestions } from "@/lib/actions/question.action";
+import { SearchParamsProps, TQuestion } from "@/types/types";
+import Pagination from "@/components/shared/pagination/Pagination";
+
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { questions, isNext } = await getQuestions({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+  });
+  return (
+    <>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className={"h1-bold text-dark100_light900"}>All Questions</h1>
+        <Link
+          href={"/ask-question"}
+          className={"flex justify-end max-sm:w-full"}
+        >
+          <Button
+            className={
+              "primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+            }
+          >
+            Ask Question
+          </Button>
+        </Link>
+      </div>
+      <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+        <LocalSearch
+          imageSrc={"/assets/icons/search.svg"}
+          route={"/"}
+          iconPosition={"left"}
+          placeholder={"Search Questions ..."}
+          otherClasses={"flex-1"}
+        />
+        <Filter
+          filters={HOME_PAGE_FILTERS}
+          otherClasses={"min-h-[56px] sm:min-w-[170px]"}
+          containerClasses={"hidden max-md:flex"}
+        />
+      </div>
+      <HomeFilter />
+      <div className="mt-10 flex w-full flex-col gap-6">
+        {questions.length > 0 ? (
+          questions.map((question) => (
+            // <QuestionCard key={question._id} question={question} />
+            <QuestionCard key={question._id} question={question as TQuestion} />
+          ))
+        ) : (
+          <NoResult
+            title={"There is no questions to show"}
+            description={
+              "  It appears that there are no saved questions in your collection at the\n" +
+              "        moment 😔.Start exploring and saving questions that pique your interest\n" +
+              "        🌟"
+            }
+            LinkHref={"/ask-question"}
+            LinkText={"Ask a Question"}
+          />
+        )}
+      </div>
+      <div className="mt-10">
+        <Pagination
+          pageNumbers={searchParams?.page ? +searchParams?.page : 1}
+          isNext={isNext}
+        />
+      </div>
+    </>
+  );
+}
+```
+![Alt text](image-200.png)
+
 ### Implement pagination on the Home page
 ### Implement pagination for the rest of the pages
 
