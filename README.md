@@ -110,7 +110,7 @@
   - [The Pagination 🔲](#the-pagination-)
     - [Create Pagination component ✅](#create-pagination-component-)
     - [Implement pagination on the Home page ✅](#implement-pagination-on-the-home-page-)
-    - [Implement pagination for the rest of the pages](#implement-pagination-for-the-rest-of-the-pages)
+    - [Implement pagination for the rest of the pages ✅](#implement-pagination-for-the-rest-of-the-pages-)
   - [Global Search 🔲](#global-search--1)
     - [Create the Global Search UI](#create-the-global-search-ui)
     - [Create GlobalSearch Result Component](#create-globalsearch-result-component)
@@ -10216,7 +10216,7 @@ export async function getQuestions(params: IGetQuestionsParams) {
   }
 }
 ```
-### Implement pagination for the rest of the pages
+### Implement pagination for the rest of the pages ✅
 do the same thing to all the other pages
 
 Collection Page
