@@ -112,34 +112,34 @@
     - [Implement pagination on the Home page ✅](#implement-pagination-on-the-home-page-)
     - [Implement pagination for the rest of the pages ✅](#implement-pagination-for-the-rest-of-the-pages-)
   - [Global Search 🔲](#global-search--1)
-    - [Create the Global Search UI](#create-the-global-search-ui)
-    - [Create GlobalSearch Result Component](#create-globalsearch-result-component)
-    - [Create Global Search Filters](#create-global-search-filters)
-    - [Implement the GlobalSearch action](#implement-the-globalsearch-action)
+    - [Create the Global Search UI 🔲](#create-the-global-search-ui-)
+    - [Create GlobalSearch Result Component 🔲](#create-globalsearch-result-component-)
+    - [Create Global Search Filters 🔲](#create-global-search-filters-)
+    - [Implement the GlobalSearch action 🔲](#implement-the-globalsearch-action-)
   - [Reputation 🔲](#reputation-)
-    - [What is Reputation and how to approach it](#what-is-reputation-and-how-to-approach-it)
-    - [Implement Reputation points for Questions](#implement-reputation-points-for-questions)
-    - [Implement Reputation points for Answers](#implement-reputation-points-for-answers)
-    - [More on Reputation and how to extend it](#more-on-reputation-and-how-to-extend-it)
+    - [What is Reputation and how to approach it 🔲](#what-is-reputation-and-how-to-approach-it-)
+    - [Implement Reputation points for Questions 🔲](#implement-reputation-points-for-questions-)
+    - [Implement Reputation points for Answers 🔲](#implement-reputation-points-for-answers-)
+    - [More on Reputation and how to extend it 🔲](#more-on-reputation-and-how-to-extend-it-)
   - [Badge System 🔲](#badge-system-)
-    - [Implement the Badge System](#implement-the-badge-system)
+    - [Implement the Badge System 🔲](#implement-the-badge-system-)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
-    - [Setup AI Answer feature](#setup-ai-answer-feature)
-    - [Implement the API route for the AI feature](#implement-the-api-route-for-the-ai-feature)
-    - [Display the AI results on the UI](#display-the-ai-results-on-the-ui)
+    - [Setup AI Answer feature 🔲](#setup-ai-answer-feature-)
+    - [Implement the API route for the AI feature 🔲](#implement-the-api-route-for-the-ai-feature-)
+    - [Display the AI results on the UI 🔲](#display-the-ai-results-on-the-ui-)
   - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
-    - [Setup AI Answer feature](#setup-ai-answer-feature-1)
-    - [Create a Loading state for the Community page](#create-a-loading-state-for-the-community-page)
-    - [Create Loading states for the rest of the pages](#create-loading-states-for-the-rest-of-the-pages)
-    - [Create toasts for a few actions](#create-toasts-for-a-few-actions)
+    - [Setup AI Answer feature 🔲](#setup-ai-answer-feature--1)
+    - [Create a Loading state for the Community page 🔲](#create-a-loading-state-for-the-community-page-)
+    - [Create Loading states for the rest of the pages 🔲](#create-loading-states-for-the-rest-of-the-pages-)
+    - [Create toasts for a few actions 🔲](#create-toasts-for-a-few-actions-)
   - [Meta Data 🔲](#meta-data-)
-    - [What is Metadata and how to implement it](#what-is-metadata-and-how-to-implement-it)
+    - [What is Metadata and how to implement it 🔲](#what-is-metadata-and-how-to-implement-it-)
   - [Bug Fixing and Recommendation 🔲](#bug-fixing-and-recommendation-)
-    - [Fix bugs and implement Recommendations.](#fix-bugs-and-implement-recommendations)
+    - [Fix bugs and implement Recommendations. 🔲](#fix-bugs-and-implement-recommendations-)
   - [Next.js 13.5+ 🔲](#nextjs-135-)
-    - [Upgrade Next.js to the latest version](#upgrade-nextjs-to-the-latest-version)
+    - [Upgrade Next.js to the latest version 🔲](#upgrade-nextjs-to-the-latest-version-)
   - [Deployment 🔲](#deployment-)
-    - [Deploy the application](#deploy-the-application)
+    - [Deploy the application 🔲](#deploy-the-application-)
 
 
 ## Setup ✅
@@ -10560,26 +10560,26 @@ export const getAllTags = async (params: GetAllTagsParams) => {
 continue it for the rest of the pages
 
 ## Global Search 🔲
-### Create the Global Search UI
-### Create GlobalSearch Result Component
-### Create Global Search Filters
-### Implement the GlobalSearch action
+### Create the Global Search UI 🔲
+### Create GlobalSearch Result Component 🔲
+### Create Global Search Filters 🔲
+### Implement the GlobalSearch action 🔲
 
 
 ## Reputation 🔲
-### What is Reputation and how to approach it
-### Implement Reputation points for Questions
-### Implement Reputation points for Answers
-### More on Reputation and how to extend it
+### What is Reputation and how to approach it 🔲
+### Implement Reputation points for Questions 🔲
+### Implement Reputation points for Answers 🔲
+### More on Reputation and how to extend it 🔲
 
 
 ## Badge System 🔲
-### Implement the Badge System
+### Implement the Badge System 🔲
 
 ## Generate AI Answer 🔲
-### Setup AI Answer feature
-### Implement the API route for the AI feature
-### Display the AI results on the UI
+### Setup AI Answer feature 🔲
+### Implement the API route for the AI feature 🔲
+### Display the AI results on the UI 🔲
 
 
 
@@ -10587,22 +10587,22 @@ continue it for the rest of the pages
 
 
 ## Loadings _ Toasts 🔲
-### Setup AI Answer feature
-### Create a Loading state for the Community page
-### Create Loading states for the rest of the pages
-### Create toasts for a few actions
+### Setup AI Answer feature 🔲
+### Create a Loading state for the Community page 🔲
+### Create Loading states for the rest of the pages 🔲
+### Create toasts for a few actions 🔲
 
 
 ## Meta Data 🔲
-### What is Metadata and how to implement it
+### What is Metadata and how to implement it 🔲
 
 ## Bug Fixing and Recommendation 🔲
 
-### Fix bugs and implement Recommendations.
+### Fix bugs and implement Recommendations. 🔲
 
 ## Next.js 13.5+ 🔲
-### Upgrade Next.js to the latest version
+### Upgrade Next.js to the latest version 🔲
 
 ## Deployment 🔲
-### Deploy the application
+### Deploy the application 🔲
 
