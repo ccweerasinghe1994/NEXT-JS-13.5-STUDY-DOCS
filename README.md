@@ -116,11 +116,11 @@
     - [Create GlobalSearch Result Component ✅](#create-globalsearch-result-component-)
     - [Create Global Search Filters ✅](#create-global-search-filters-)
     - [Implement the GlobalSearch action ✅](#implement-the-globalsearch-action-)
-  - [Reputation 🔲](#reputation-)
+  - [Reputation ✅](#reputation-)
     - [What is Reputation and how to approach it ✅](#what-is-reputation-and-how-to-approach-it-)
-    - [Implement Reputation points for Questions 🔲](#implement-reputation-points-for-questions-)
-    - [Implement Reputation points for Answers 🔲](#implement-reputation-points-for-answers-)
-    - [More on Reputation and how to extend it 🔲](#more-on-reputation-and-how-to-extend-it-)
+    - [Implement Reputation points for Questions ✅](#implement-reputation-points-for-questions-)
+    - [Implement Reputation points for Answers ✅](#implement-reputation-points-for-answers-)
+    - [More on Reputation and how to extend it ✅](#more-on-reputation-and-how-to-extend-it-)
   - [Badge System 🔲](#badge-system-)
     - [Implement the Badge System 🔲](#implement-the-badge-system-)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
@@ -11196,14 +11196,14 @@ export const globalSearch = async (params: SearchParams) => {
 };
 ```
 
-## Reputation 🔲
+## Reputation ✅
 ### What is Reputation and how to approach it ✅
 ![Alt text](image-207.png)
 
 1 - five points for question creation 
 2 - author who get  upvote gets +10, downvote -10
 3 - user who upvotes or downvote gets +1 or -1
-### Implement Reputation points for Questions 🔲
+### Implement Reputation points for Questions ✅
 server action update
 ```ts
 export async function createQuestion(params: ICreateQuestionParams) {
@@ -11312,8 +11312,172 @@ export const upVoteQuestion = async (params: QuestionVoteParams) => {
 };
 ```
 
-### Implement Reputation points for Answers 🔲
-### More on Reputation and how to extend it 🔲
+### Implement Reputation points for Answers ✅
+server action update
+```ts
+export const createAnswer = async (params: CreateAnswerParams) => {
+  const { content, author, question, path } = params;
+  try {
+    await connectToDatabase();
+    const newAnswer: IAnswer = await Answer.create({
+      content,
+      author,
+      question,
+    });
+    // add answer to question
+    const questionDocument = await Question.findByIdAndUpdate(question, {
+      $push: { answers: newAnswer._id },
+    });
+    await Interaction.create({
+      user: author,
+      action: "answer",
+      question,
+      answer: newAnswer._id,
+      tags: questionDocument.tags,
+    });
+    // 10 points for answering a question
+    await User.findByIdAndUpdate(author, {
+      $inc: { reputation: 10 },
+    });
+    revalidatePath(path);
+    return newAnswer;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+```ts
+export const upVoteAnswer = async (params: AnswerVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, path, answerId, hasUpVoted, hasDownVoted } = params;
+    let updateQuery: any = {};
+    if (hasUpVoted) {
+      updateQuery = { $pull: { upvotes: userId } };
+    } else if (hasDownVoted) {
+      updateQuery = {
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { upvotes: userId } };
+    }
+    const answer = await Answer.findByIdAndUpdate(answerId, updateQuery, {
+      new: true,
+    });
+    if (!answer) {
+      throwError("Answer not found");
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        reputation: hasUpVoted ? -2 : 2,
+      },
+    });
+
+    // increment author reputation by +10 or -10 depending on the action
+    await User.findOneAndUpdate(answer.author, {
+      $inc: {
+        reputation: hasUpVoted ? -10 : 10,
+      },
+    });
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+```ts
+export const downVoteAnswer = async (params: AnswerVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, path, answerId, hasUpVoted, hasDownVoted } = params;
+    let updateQuery: any = {};
+    if (hasDownVoted) {
+      updateQuery = { $pull: { downvotes: userId } };
+    } else if (hasUpVoted) {
+      updateQuery = {
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { downvotes: userId } };
+    }
+    const answer = await Answer.findByIdAndUpdate(answerId, updateQuery, {
+      new: true,
+    });
+    if (!answer) {
+      throwError("Answer not found");
+    }
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        reputation: hasDownVoted ? -2 : 2,
+      },
+    });
+
+    // increment author reputation by +10 or -10 depending on the action
+    await User.findOneAndUpdate(answer.author, {
+      $inc: {
+        reputation: hasDownVoted ? -10 : 10,
+      },
+    });
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+```ts
+export const downVoteQuestion = async (params: QuestionVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { questionId, path, hasUpVoted, hasDownVoted, userId } = params;
+    let updateQuery: any = {};
+    if (hasDownVoted) {
+      updateQuery = { $pull: { downvotes: userId } };
+    } else if (hasUpVoted) {
+      updateQuery = {
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { downvotes: userId } };
+    }
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+    if (!question) {
+      throw new Error("Question not found");
+    }
+    const incrementBy = hasDownVoted ? -1 : 1;
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        reputation: incrementBy,
+      },
+    });
+    // increment author reputation by +10 or -10 depending on the action
+    await User.findOneAndUpdate(question.author, {
+      $inc: {
+        reputation: incrementBy * 10,
+      },
+    });
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
+
+
+### More on Reputation and how to extend it ✅
 
 
 ## Badge System 🔲
