@@ -121,8 +121,8 @@
     - [Implement Reputation points for Questions ✅](#implement-reputation-points-for-questions-)
     - [Implement Reputation points for Answers ✅](#implement-reputation-points-for-answers-)
     - [More on Reputation and how to extend it ✅](#more-on-reputation-and-how-to-extend-it-)
-  - [Badge System 🔲](#badge-system-)
-    - [Implement the Badge System 🔲](#implement-the-badge-system-)
+  - [Badge System ✅](#badge-system-)
+    - [Implement the Badge System ✅](#implement-the-badge-system-)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
     - [Setup AI Answer feature 🔲](#setup-ai-answer-feature-)
     - [Implement the API route for the AI feature 🔲](#implement-the-api-route-for-the-ai-feature-)
@@ -11480,17 +11480,198 @@ export const downVoteQuestion = async (params: QuestionVoteParams) => {
 ### More on Reputation and how to extend it ✅
 
 
-## Badge System 🔲
-### Implement the Badge System 🔲
+## Badge System ✅
+### Implement the Badge System ✅
+generating badge function
+```ts
 
+type BadgeParams = {
+  criteria: {
+    type: BadgeCriteriaType;
+    count: number;
+  }[];
+};
+
+export const assignBadges = (params: BadgeParams) => {
+  const badgeCounts: BadgeCounts = {
+    BRONZE: 0,
+    SILVER: 0,
+    GOLD: 0,
+  };
+  const { criteria } = params;
+
+  criteria.forEach((item) => {
+    const { type, count } = item;
+
+    const badgeLevels = BADGE_CRITERIA[type];
+
+    Object.keys(badgeLevels).forEach((level) => {
+      if (count >= badgeLevels[level as keyof typeof badgeLevels]) {
+        badgeCounts[level as keyof typeof badgeCounts]++;
+      }
+    });
+  });
+  return badgeCounts;
+};
+
+```
+server action update
+
+```ts
+export const getUserInfo = async (params: GetUserByIdParams) => {
+  try {
+    const { userId } = params;
+    await connectToDatabase();
+    const user = await User.findOne({
+      clerkId: userId,
+    });
+    if (!user) {
+      throwError("User not found");
+    }
+    const totalQuestions = await Question.countDocuments({
+      author: user._id,
+    });
+    const totalAnswers = await Answer.countDocuments({
+      author: user._id,
+    });
+    const [questionUpvotes] = await Question.aggregate([
+      { $match: { author: user._id } },
+      { $project: { _id: 0, upvotes: { $size: "$upvotes" } } },
+      { $group: { _id: null, totalUpVotes: { $sum: "$upvotes" } } },
+    ]);
+    const [answerUpvotes] = await Answer.aggregate([
+      { $match: { author: user._id } },
+      { $project: { _id: 0, upvotes: { $size: "$upvotes" } } },
+      { $group: { _id: null, totalUpVotes: { $sum: "$upvotes" } } },
+    ]);
+
+    const [questionViews] = await Question.aggregate([
+      { $match: { author: user._id } },
+      { $group: { _id: null, totalViews: { $sum: "$views" } } },
+    ]);
+
+    const criteria = [
+      { type: "QUESTION_COUNT" as BadgeCriteriaType, count: totalQuestions },
+      { type: "ANSWER_COUNT" as BadgeCriteriaType, count: totalAnswers },
+      {
+        type: "ANSWER_UPVOTES" as BadgeCriteriaType,
+        count: +answerUpvotes?.totalUpVotes || 0,
+      },
+      {
+        type: "QUESTION_UPVOTES" as BadgeCriteriaType,
+        count: +questionUpvotes?.totalUpVotes || 0,
+      },
+      {
+        type: "TOTAL_VIEWS" as BadgeCriteriaType,
+        count: +questionViews?.totalViews || 0,
+      },
+    ];
+    const badgeCounts = assignBadges({ criteria });
+    console.log(badgeCounts);
+    return { user, totalQuestions, totalAnswers, badgeCounts };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+Stats component
+```tsx
+import { FC } from "react";
+import { formatNumber } from "@/lib/utils";
+import Image from "next/image";
+
+type TStatsCard = {
+  imageUrl: string;
+  value: number;
+  title: string;
+};
+const StatsCard: FC<TStatsCard> = ({ imageUrl, value, title }) => {
+  return (
+    <div className="light-border background-light900_dark300 flex flex-wrap items-center justify-start gap-4 rounded-md border p-6 shadow-light-300 dark:shadow-dark-200">
+      <Image src={imageUrl} alt={title} height={50} width={40} />
+      <div className="">
+        <p className="paragraph-semibold text-dark200_light900">{value}</p>
+        <p className="body-medium text-dark400_light900">{title}</p>
+      </div>
+    </div>
+  );
+};
+
+type TStats = {
+  totalQuestions: number;
+  totalAnswers: number;
+  reputation: number;
+  badgeCounts: {
+    GOLD: number;
+    SILVER: number;
+    BRONZE: number;
+  };
+};
+
+const Stats: FC<TStats> = ({
+  totalAnswers,
+  totalQuestions,
+  badgeCounts,
+  reputation,
+}) => {
+  const { GOLD, BRONZE, SILVER } = badgeCounts;
+  return (
+    <div className={"mt-10"}>
+      <h4 className="h3-semibold text-dark200_light900">
+        Stats - {reputation}
+      </h4>
+      <div className="mt-5 grid grid-cols-1 gap-5 xs:grid-cols-2 md:grid-cols-4 ">
+        <div className="light-border background-light900_dark300 flex flex-wrap items-center justify-evenly gap-4 rounded-md border p-6 shadow-light-300 dark:shadow-dark-200">
+          <div className="">
+            <p className="paragraph-semibold text-dark200_light900">
+              {formatNumber(totalQuestions)}
+            </p>
+            <p className="body-medium text-dark400_light900">Questions</p>
+          </div>
+          <div className="">
+            <p className="paragraph-semibold text-dark200_light900">
+              {formatNumber(totalAnswers)}
+            </p>
+            <p className="body-medium text-dark400_light900">Answers</p>
+          </div>
+        </div>
+        <StatsCard
+          value={GOLD}
+          title={"Gold Badges"}
+          imageUrl={"/assets/icons/gold-medal.svg"}
+        />{" "}
+        <StatsCard
+          value={SILVER}
+          title={"Silver Badges"}
+          imageUrl={"/assets/icons/silver-medal.svg"}
+        />{" "}
+        <StatsCard
+          value={BRONZE}
+          title={"Bronze Badges"}
+          imageUrl={"/assets/icons/bronze-medal.svg"}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Stats;
+```
+
+passing Data to the Stats component
+```tsx
+      <Stats
+        totalQuestions={result.totalQuestions}
+        totalAnswers={result.totalAnswers}
+        badgeCounts={result.badgeCounts}
+        reputation={result.user.reputation}
+      />
+```
 ## Generate AI Answer 🔲
 ### Setup AI Answer feature 🔲
 ### Implement the API route for the AI feature 🔲
 ### Display the AI results on the UI 🔲
-
-
-http://localhost:3000/
-
 
 
 ## Loadings _ Toasts 🔲
