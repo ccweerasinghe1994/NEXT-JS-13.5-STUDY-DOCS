@@ -95,27 +95,27 @@
   - [Show Top Results ✅](#show-top-results-)
     - [Show Top Questions ✅](#show-top-questions-)
     - [Show Popular Tags ✅](#show-popular-tags-)
-  - [The Local Search Functionality 🔲](#the-local-search-functionality-)
+  - [The Local Search Functionality ✅](#the-local-search-functionality-)
     - [Manage search state ✅](#manage-search-state-)
     - [Implement Search functionality for the Home page ✅](#implement-search-functionality-for-the-home-page-)
     - [Implement Search functionality for the Community page ✅](#implement-search-functionality-for-the-community-page-)
     - [Implement Search functionality for the Collection page ✅](#implement-search-functionality-for-the-collection-page-)
     - [Implement Search functionality for the Tags page ✅](#implement-search-functionality-for-the-tags-page-)
-  - [The Filters 🔲](#the-filters-)
+  - [The Filters ✅](#the-filters-)
     - [Manage Filter state ✅](#manage-filter-state-)
     - [Integrate Filters on Home page ✅](#integrate-filters-on-home-page-)
     - [Integrate Filters on the Community page ✅](#integrate-filters-on-the-community-page-)
     - [Integrate Filters on the Collection page ✅](#integrate-filters-on-the-collection-page-)
     - [Integrate Filters for Tags and Answers ✅](#integrate-filters-for-tags-and-answers-)
-  - [The Pagination 🔲](#the-pagination-)
+  - [The Pagination ✅](#the-pagination-)
     - [Create Pagination component ✅](#create-pagination-component-)
     - [Implement pagination on the Home page ✅](#implement-pagination-on-the-home-page-)
     - [Implement pagination for the rest of the pages ✅](#implement-pagination-for-the-rest-of-the-pages-)
-  - [Global Search 🔲](#global-search--1)
-    - [Create the Global Search UI 🔲](#create-the-global-search-ui-)
-    - [Create GlobalSearch Result Component 🔲](#create-globalsearch-result-component-)
-    - [Create Global Search Filters 🔲](#create-global-search-filters-)
-    - [Implement the GlobalSearch action 🔲](#implement-the-globalsearch-action-)
+  - [Global Search ✅](#global-search--1)
+    - [Create the Global Search UI ✅](#create-the-global-search-ui-)
+    - [Create GlobalSearch Result Component ✅](#create-globalsearch-result-component-)
+    - [Create Global Search Filters ✅](#create-global-search-filters-)
+    - [Implement the GlobalSearch action ✅](#implement-the-globalsearch-action-)
   - [Reputation 🔲](#reputation-)
     - [What is Reputation and how to approach it 🔲](#what-is-reputation-and-how-to-approach-it-)
     - [Implement Reputation points for Questions 🔲](#implement-reputation-points-for-questions-)
@@ -9061,7 +9061,7 @@ export default RightSideBar;
 ![Alt text](image-187.png)
 
 
-## The Local Search Functionality 🔲
+## The Local Search Functionality ✅
 
 ### Manage search state ✅
 
@@ -9445,7 +9445,7 @@ export const getQuestionByTagId = async (params: GetQuestionsByTagIdParams) => {
 };
 ```
 
-## The Filters 🔲
+## The Filters ✅
 
 ### Manage Filter state ✅
 
@@ -10002,7 +10002,7 @@ export default Page;
 ![Alt text](image-198.png)
 ![Alt text](image-197.png)
 
-## The Pagination 🔲
+## The Pagination ✅
 
 ### Create Pagination component ✅
 
@@ -10559,9 +10559,9 @@ export const getAllTags = async (params: GetAllTagsParams) => {
 ```
 continue it for the rest of the pages
 
-## Global Search 🔲
+## Global Search ✅
 
-### Create the Global Search UI 🔲
+### Create the Global Search UI ✅
 let's update GlobalSearch component
 ```tsx
 "use client";
@@ -10640,7 +10640,7 @@ const GlobalResult = () => {
 export default GlobalResult;
 ```
 
-### Create GlobalSearch Result Component 🔲
+### Create GlobalSearch Result Component ✅
 
 ![Alt text](image-202.png)
 
@@ -10791,9 +10791,410 @@ export default GlobalFilters;
 
 ![Alt text](image-205.png)
 
-### Create Global Search Filters 🔲
-### Implement the GlobalSearch action 🔲
+### Create Global Search Filters ✅
+GlobalFiler component
+```tsx
+"use client";
+import { GlobalSearchFilters } from "@/constants/filters";
+import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { formatUrlQuery } from "@/lib/utils";
 
+const GlobalFilters = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const typeParams = searchParams.get("type");
+  const [active, setActive] = useState(typeParams || "");
+  const handleClick = (value: string) => {
+    if (active === value) {
+      setActive("");
+      const newUrl = formatUrlQuery({
+        params: searchParams.toString(),
+        key: "type",
+        value: null,
+      });
+      router.push(newUrl, { scroll: false });
+    } else {
+      setActive(value);
+      const newUrl = formatUrlQuery({
+        params: searchParams.toString(),
+        key: "type",
+        value: value ?? null,
+      });
+      router.push(newUrl, { scroll: false });
+    }
+  };
+  return (
+    <div className={"flex items-center gap-5 px-5"}>
+      <p className="text-dark400_light900 body-medium">Type :</p>
+      <div className="flex gap-3">
+        {GlobalSearchFilters.map((filter) => (
+          <Button
+            key={filter.value}
+            type={"button"}
+            className={`light-border-2 small-medium rounded-2xl px-5 py-2 capitalize text-light-800 dark:text-light-800 dark:hover:text-primary-500 ${
+              active === filter.value
+                ? "bg-primary-500 text-light-900"
+                : "bg-light-700 text-dark-400 hover:text-primary-500 dark:bg-dark-500"
+            }`}
+            onClick={() => handleClick(filter.value)}
+          >
+            {filter.name}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default GlobalFilters;
+```
+![Alt text](image-206.png)
+
+### Implement the GlobalSearch action ✅
+global search component
+```tsx
+"use client";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatUrlQuery, removeKeysFromQuery } from "@/lib/utils";
+import GlobalResult from "@/components/shared/globalResult/GlobalResult";
+
+const GlobalSearch = () => {
+  const router = useRouter();
+  const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q");
+  const [search, setSearch] = useState(query || "");
+  const [isOpen, setIsOpen] = useState(false);
+  const popupRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearch("");
+      }
+    };
+    setIsOpen(false);
+    setSearch("");
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [pathName]);
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (search) {
+        const newUrl = formatUrlQuery({
+          params: searchParams.toString(),
+          key: "global",
+          value: search,
+        });
+        router.push(newUrl, { scroll: false });
+      } else {
+        if (query) {
+          const newUrl = removeKeysFromQuery({
+            params: searchParams.toString(),
+            keys: ["global", "key"],
+          });
+          router.push(newUrl, { scroll: false });
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [search, pathName, router, searchParams, query]);
+  return (
+    <div
+      ref={popupRef}
+      className={"relative w-full max-w-[600px] max-lg:hidden"}
+    >
+      <div className="background-light800_darkgradient relative flex min-h-[56px] grow items-center  gap-1 rounded-xl px-4">
+        <Image
+          src={"/assets/icons/search.svg"}
+          alt={"search"}
+          width={24}
+          height={24}
+          className={"cursor-pointer"}
+        />
+        <Input
+          className={
+            "paragraph-regular no-focus placeholder background-light800_darkgradient text-dark400_light700 border-none shadow-none outline-none"
+          }
+          type={"text"}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            if (!isOpen) setIsOpen(true);
+            if (e.target.value === "" && isOpen) setIsOpen(false);
+          }}
+          placeholder={"Search Globally"}
+          value={search}
+        />
+      </div>
+      {isOpen && <GlobalResult />}
+    </div>
+  );
+};
+
+export default GlobalSearch;
+```
+GlobalResult component
+```tsx
+"use client";
+import { useEffect, useState } from "react";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import GlobalFilters from "@/components/shared/search/GlobalFilters";
+import { globalSearch, TGlobalSearchTypes } from "@/lib/actions/general.action";
+
+const GlobalResult = () => {
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState([]);
+
+  const global = searchParams.get("global");
+  const type = searchParams.get("type");
+
+  useEffect(() => {
+    if (global || type) {
+      const fetchResults = async () => {
+        setResults([]);
+        setIsLoading(true);
+
+        try {
+          const result = await globalSearch({
+            type,
+            query: global,
+          });
+          console.log("result", result);
+          setResults(JSON.parse(result ?? "[]"));
+        } catch (e) {
+          console.log(e);
+          throw e;
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      if (global) {
+        fetchResults();
+      }
+    }
+  }, [global, type]);
+  const renderLink = (type: TGlobalSearchTypes, id: string) => {
+    switch (type) {
+      case "user":
+        return `/profile/${id}`;
+      case "tag":
+        return `/tags/${id}`;
+      case "question":
+        return `/question/${id}`;
+      case "answer":
+        return `/question/${id}`;
+      default:
+        return `/`;
+    }
+  };
+  return (
+    <div
+      className={
+        "absolute top-full z-10 mt-3 w-full rounded-xl bg-light-800 py-5 shadow-sm dark:bg-dark-400"
+      }
+    >
+      <GlobalFilters />
+      <div className={"my-5 h-[1px] bg-light-700/50 dark:bg-dark-500/50"} />
+      <div className="space-y-5">
+        <p className="text-dark400_light900 paragraph-semibold px-5">
+          Top Match
+        </p>
+        {isLoading ? (
+          <div className={"flex-center flex-col px-5"}>
+            <ReloadIcon
+              className={"my-2 h-10 w-10 animate-spin text-primary-500"}
+            />
+            <p className="text-dark200_light800 body-regular">
+              Browsing the entire app
+            </p>
+          </div>
+        ) : (
+          <div className={"flex flex-col gap-2"}>
+            {results.length > 0 ? (
+              results.map(
+                (
+                  result: { type: string; title: string; id: string },
+                  index,
+                ) => (
+                  <Link
+                    href={renderLink(
+                      result.type as TGlobalSearchTypes,
+                      result.id,
+                    )}
+                    key={result.type + result.id + index}
+                    className={
+                      "flex w-full cursor-pointer items-start gap-3 rounded-xl px-5 py-2.5 hover:bg-light-700/50 dark:hover:bg-dark-500/50"
+                    }
+                  >
+                    <Image
+                      src={"/assets/icons/tag.svg"}
+                      alt={"tag"}
+                      width={18}
+                      height={18}
+                      className={"invert-colors mt-1 object-contain"}
+                    />
+                    <div className="flex flex-col">
+                      <p className="body-medium text-dark200_light800  small-medium mt-1 line-clamp-1 font-bold capitalize">
+                        {result.title}
+                      </p>
+                      <p className="text-light400_light500 small-medium mt-1  font-bold capitalize">
+                        {result.type}
+                      </p>
+                    </div>
+                  </Link>
+                ),
+              )
+            ) : (
+              <div className={"flex-center flex-col px-5"}>
+                <p className={"text-dark200_light800 body-regular px-5 py-2.5"}>
+                  Oops no result found
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GlobalResult;
+```
+
+server action
+```ts
+"use server";
+
+import { SearchParams } from "@/lib/actions/shared";
+import { connectToDatabase } from "@/lib/mogoose";
+import { FilterQuery } from "mongoose";
+import Question, { IQuestion } from "@/database/question.model";
+import Tag, { ITag } from "@/database/tag.model";
+import Answer, { IAnswer } from "@/database/answer.model";
+import User, { IUser } from "@/database/user.model";
+import { throwError } from "@/lib/utils";
+
+export type TGlobalSearchTypes =
+  | "answer"
+  | "question"
+  | "tag"
+  | "user"
+  | undefined;
+export const globalSearch = async (params: SearchParams) => {
+  try {
+    await connectToDatabase();
+    const { type, query } = params;
+    const regex: FilterQuery<IQuestion | ITag | IAnswer | IUser> = {
+      $regex: query,
+      $options: "i",
+    };
+
+    console.log("🔥🔥🔥🔥🔥", regex);
+    let result = [];
+    const modelAndType = [
+      {
+        model: Question,
+        type: "question",
+        searchField: "title",
+      },
+      {
+        model: User,
+        type: "user",
+        searchField: "name",
+      },
+      {
+        model: Answer,
+        type: "answer",
+        searchField: "content",
+      },
+      {
+        model: Tag,
+        type: "tag",
+        searchField: "name",
+      },
+    ];
+
+    const typeLower: TGlobalSearchTypes =
+      type?.toLowerCase() as TGlobalSearchTypes;
+
+    if (
+      !typeLower ||
+      !["answer", "question", "tag", "user"].includes(typeLower)
+    ) {
+      //     search all
+      for (const { searchField, type, model } of modelAndType) {
+        const queryResult = await model
+          .find({
+            [searchField]: regex,
+          })
+          .limit(2);
+        result.push(
+          ...queryResult.map((item) => ({
+            title:
+              type === "user"
+                ? `Answer containing ${query}`
+                : item[searchField],
+            type,
+            id:
+              type === "user"
+                ? item.clerkId
+                : type === "answer"
+                ? item.question
+                : item._id,
+          })),
+        );
+      }
+    } else {
+      //     search specific type
+      const modelInfo = modelAndType.find((m) => m.type === typeLower);
+
+      if (!modelInfo) {
+        throwError("Invalid type");
+        return;
+      }
+
+      const queryResult = await modelInfo.model
+        .find({
+          [modelInfo.searchField]: regex,
+        })
+        .limit(8);
+
+      result = queryResult.map((item) => ({
+        title:
+          typeLower === "user"
+            ? `Answer containing ${query}`
+            : item[modelInfo.searchField],
+        type,
+        id:
+          typeLower === "user"
+            ? item.clerkId
+            : typeLower === "answer"
+            ? item.question
+            : item._id,
+      }));
+    }
+    return JSON.stringify(result);
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+```
 
 ## Reputation 🔲
 ### What is Reputation and how to approach it 🔲
@@ -10811,7 +11212,7 @@ export default GlobalFilters;
 ### Display the AI results on the UI 🔲
 
 
-
+http://localhost:3000/
 
 
 
