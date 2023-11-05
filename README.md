@@ -11199,7 +11199,119 @@ export const globalSearch = async (params: SearchParams) => {
 ## Reputation 🔲
 ### What is Reputation and how to approach it ✅
 ![Alt text](image-207.png)
+
+1 - five points for question creation 
+2 - author who get  upvote gets +10, downvote -10
+3 - user who upvotes or downvote gets +1 or -1
 ### Implement Reputation points for Questions 🔲
+server action update
+```ts
+export async function createQuestion(params: ICreateQuestionParams) {
+  try {
+    await connectToDatabase();
+    const { title, content, tags, author, path } = params;
+    const question = await Question.create({
+      title,
+      content,
+      author,
+    });
+
+    const tagDocuments: ITag[] = [];
+    //   create the tag document if it doesn't exist or get the existing one
+    for (const tag of tags) {
+      const existingTag: ITag = await Tag.findOneAndUpdate(
+        {
+          name: { $regex: new RegExp(`^${tag}$`, "i") },
+        },
+        {
+          $setOnInsert: {
+            name: tag,
+          },
+          $push: {
+            questions: question._id,
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
+      tagDocuments.push(existingTag);
+    }
+    //   let's update the question with the tags
+    await Question.findByIdAndUpdate(question._id, {
+      $push: {
+        tags: { $each: tagDocuments },
+      },
+    });
+
+    // give five points to the user who asked the question
+
+    await Interaction.create({
+      user: author,
+      action: "ask_question",
+      question: question._id,
+      tags: tagDocuments,
+    });
+    await User.findByIdAndUpdate(author, {
+      $inc: {
+        reputation: 5,
+      },
+    });
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
+
+upvote server action
+```ts
+export const upVoteQuestion = async (params: QuestionVoteParams) => {
+  try {
+    await connectToDatabase();
+    const { questionId, path, hasUpVoted, hasDownVoted, userId } = params;
+    let updateQuery: any = {};
+    if (hasUpVoted) {
+      updateQuery = { $pull: { upvotes: userId } };
+    } else if (hasDownVoted) {
+      updateQuery = {
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { upvotes: userId } };
+    }
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    // increment user reputation by +1 or -1 depending on the action
+    const incrementBy = hasUpVoted ? -1 : 1;
+    await User.findByIdAndUpdate(userId, {
+      $inc: {
+        reputation: incrementBy,
+      },
+    });
+    // increment author reputation by +10 or -10 depending on the action
+    await User.findOneAndUpdate(question.author, {
+      $inc: {
+        reputation: incrementBy * 10,
+      },
+    });
+
+    revalidatePath(path);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+```
+
 ### Implement Reputation points for Answers 🔲
 ### More on Reputation and how to extend it 🔲
 
