@@ -124,7 +124,7 @@
   - [Badge System ✅](#badge-system-)
     - [Implement the Badge System ✅](#implement-the-badge-system-)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
-    - [Setup AI Answer feature 🔲](#setup-ai-answer-feature-)
+    - [Setup AI Answer feature ✅](#setup-ai-answer-feature-)
     - [Implement the API route for the AI feature 🔲](#implement-the-api-route-for-the-ai-feature-)
     - [Display the AI results on the UI 🔲](#display-the-ai-results-on-the-ui-)
   - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
@@ -11669,11 +11669,126 @@ passing Data to the Stats component
       />
 ```
 ## Generate AI Answer 🔲
-### Setup AI Answer feature 🔲
+### Setup AI Answer feature ✅
+creating the handle method
+```ts
+  const generateAiAnswer = async () => {
+    if (!authorId) return;
+    setIsSubmittingAI(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/chatgpt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question,
+            authorId: JSON.parse(authorId),
+          }),
+        },
+      );
+
+      const data = await response.json();
+      alert(data.reply);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    } finally {
+      setIsSubmittingAI(false);
+    }
+  };
+```
 ### Implement the API route for the AI feature 🔲
+api end point chatgpt
+```ts
+import { NextRequest, NextResponse } from "next/server";
+
+export const POST = async (req: NextRequest, res: NextResponse) => {
+  const { question } = await req.json();
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "your are a  knowledgeable assistant that provides quality information",
+          },
+          {
+            role: "user",
+            content: `Tell me ${question}`,
+          },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    const reply = data.choices[0].message.content;
+    return NextResponse.json({ reply });
+  } catch (e) {
+    console.log(e);
+    return NextResponse.json(
+      { error: "Error Getting a AI Answer" },
+      { status: 500 },
+    );
+  }
+};
+```
 ### Display the AI results on the UI 🔲
 
+```tsx
 
+      const data = await response.json();
+      const formatAnswer = data.reply.replace(/\n/g, "<br/>");
+
+      if (editorRef.current) {
+        const editor = editorRef.current as any;
+        editor.setContent(formatAnswer);
+      }
+    } catch (e) {
+      console.log(e);
+      throw e;
+    } finally {
+      setIsSubmittingAI(false);
+    }
+  };
+  return (
+    <div>
+      <div className="mt-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+        <h4 className="paragraph-semibold text-dark400_light800">
+          Write your answer here
+        </h4>
+        <Button
+          className={
+            "btn  light-border-2 gap-1.5 rounded-md px-4 py-2.5 text-primary-500 shadow-none"
+          }
+          onClick={generateAiAnswer}
+        >
+          {isSubmittingAI ? (
+            <>Generating....</>
+          ) : (
+            <>
+              <Image
+                src={"/assets/icons/stars.svg"}
+                alt={"AI image"}
+                width={12}
+                height={12}
+                className={"object-contain "}
+              />
+              Generate AI Answer
+            </>
+          )}
+        </Button>
+      </div>
+```
 ## Loadings _ Toasts 🔲
 ### Setup AI Answer feature 🔲
 ### Create a Loading state for the Community page 🔲
