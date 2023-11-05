@@ -117,7 +117,7 @@
     - [Create Global Search Filters ✅](#create-global-search-filters-)
     - [Implement the GlobalSearch action ✅](#implement-the-globalsearch-action-)
   - [Reputation 🔲](#reputation-)
-    - [What is Reputation and how to approach it 🔲](#what-is-reputation-and-how-to-approach-it-)
+    - [What is Reputation and how to approach it ✅](#what-is-reputation-and-how-to-approach-it-)
     - [Implement Reputation points for Questions 🔲](#implement-reputation-points-for-questions-)
     - [Implement Reputation points for Answers 🔲](#implement-reputation-points-for-answers-)
     - [More on Reputation and how to extend it 🔲](#more-on-reputation-and-how-to-extend-it-)
@@ -11197,7 +11197,8 @@ export const globalSearch = async (params: SearchParams) => {
 ```
 
 ## Reputation 🔲
-### What is Reputation and how to approach it 🔲
+### What is Reputation and how to approach it ✅
+![Alt text](image-207.png)
 ### Implement Reputation points for Questions 🔲
 ### Implement Reputation points for Answers 🔲
 ### More on Reputation and how to extend it 🔲
