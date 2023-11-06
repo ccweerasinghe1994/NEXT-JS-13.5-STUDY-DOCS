@@ -123,14 +123,13 @@
     - [More on Reputation and how to extend it ✅](#more-on-reputation-and-how-to-extend-it-)
   - [Badge System ✅](#badge-system-)
     - [Implement the Badge System ✅](#implement-the-badge-system-)
-  - [Generate AI Answer 🔲](#generate-ai-answer-)
+  - [Generate AI Answer ✅](#generate-ai-answer-)
     - [Setup AI Answer feature ✅](#setup-ai-answer-feature-)
     - [Implement the API route for the AI feature ✅](#implement-the-api-route-for-the-ai-feature-)
     - [Display the AI results on the UI ✅](#display-the-ai-results-on-the-ui-)
-  - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
+  - [Loadings \_ Toasts ✅](#loadings-_-toasts-)
     - [Create a Loading state for the Community page ✅](#create-a-loading-state-for-the-community-page-)
-    - [Create Loading states for the rest of the pages 🔲](#create-loading-states-for-the-rest-of-the-pages-)
-    - [Create toasts for a few actions 🔲](#create-toasts-for-a-few-actions-)
+    - [Create toasts for a few actions ✅](#create-toasts-for-a-few-actions-)
   - [Meta Data 🔲](#meta-data-)
     - [What is Metadata and how to implement it 🔲](#what-is-metadata-and-how-to-implement-it-)
   - [Bug Fixing and Recommendation 🔲](#bug-fixing-and-recommendation-)
@@ -11667,7 +11666,7 @@ passing Data to the Stats component
         reputation={result.user.reputation}
       />
 ```
-## Generate AI Answer 🔲
+## Generate AI Answer ✅
 ### Setup AI Answer feature ✅
 creating the handle method
 ```ts
@@ -11788,7 +11787,7 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
         </Button>
       </div>
 ```
-## Loadings _ Toasts 🔲
+## Loadings _ Toasts ✅
 
 ### Create a Loading state for the Community page ✅
 Loading component
@@ -11823,9 +11822,118 @@ const Loading = () => {
 export default Loading;
 
 ```
-### Create Loading states for the rest of the pages 🔲
-### Create toasts for a few actions 🔲
+### Create toasts for a few actions ✅
 
+```shell
+npx shadcn-ui@latest add toast
+```
+```tsx
+const Layout: FC<TLayout> = ({ children }) => {
+  return (
+    <main className={"background-light850_dark100 relative"}>
+      <NavBar />
+      <div className="flex">
+        <LeftSideBar />
+        <section
+          className={
+            "flex min-h-screen flex-1 flex-col px-6 pb-6 pt-36 max-md:pb-14 sm:px-14"
+          }
+        >
+          <div className={"mx-auto w-full max-w-5xl"}>{children}</div>
+        </section>
+        <RightSideBar />
+      </div>
+      <Toaster />
+    </main>
+  );
+};
+```
+
+adding it to the Votes component
+```tsx
+"use client";
+import { FC, useEffect } from "react";
+import Image from "next/image";
+import { formatNumber } from "@/lib/utils";
+import {
+  downVoteQuestion,
+  upVoteQuestion,
+} from "@/lib/actions/question.action";
+import { usePathname, useRouter } from "next/navigation";
+import { downVoteAnswer, upVoteAnswer } from "@/lib/actions/answer.action";
+import { toggleSaveQuestion } from "@/lib/actions/user.action";
+import { viewQuestion } from "@/lib/actions/interaction.action";
+import { useToast } from "@/components/ui/use-toast";
+
+type TVotesProps = {
+  type: "question" | "answer";
+  itemId: string;
+  userId: string;
+  upvotes: number;
+  hasUpVoted: boolean;
+  downVotes: number;
+  hasDownVoted: boolean;
+  hasSaved?: boolean;
+};
+const Votes: FC<TVotesProps> = ({
+  hasUpVoted,
+  upvotes,
+  downVotes,
+  hasDownVoted,
+  itemId,
+  type,
+  hasSaved,
+  userId,
+}) => {
+  const pathName = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+  const handleSave = async () => {
+    try {
+      if (type !== "question") return;
+      await toggleSaveQuestion({
+        questionId: itemId,
+        userId,
+        path: pathName,
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+  const handleVote = async (action: "upvote" | "downVote") => {
+    if (!userId) {
+      toast({
+        title: "Please login",
+        description: "You must bew logged in to vote",
+      });
+    }
+
+    if (action === "upvote") {
+      if (type === "question") {
+        await upVoteQuestion({
+          questionId: itemId,
+          userId,
+          hasUpVoted,
+          hasDownVoted,
+          path: pathName,
+        });
+      } else if (type === "answer") {
+        await upVoteAnswer({
+          answerId: itemId,
+          userId,
+          hasUpVoted,
+          hasDownVoted,
+          path: pathName,
+        });
+      }
+      toast({
+        title: `Upvote ${!hasUpVoted ? "added" : "removed"}!`,
+        variant: !hasUpVoted ? "default" : "destructive",
+      });
+    }
+
+```
 
 ## Meta Data 🔲
 ### What is Metadata and how to implement it 🔲
