@@ -11937,10 +11937,115 @@ const Votes: FC<TVotesProps> = ({
 
 ## Meta Data 🔲
 ### What is Metadata and how to implement it 🔲
+adding meta tags to the home page
+```tsx
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Home page | Stack Flow",
+  description: "Stack Flow is a community of amazing minds, join us now",
+};
+```
+![Alt text](image-208.png)
 ## Bug Fixing and Recommendation 🔲
 
 ### Fix bugs and implement Recommendations. 🔲
+```ts
+export const getRecentQuestions = async (params: RecommendedParams) => {
+  try {
+    await connectToDatabase();
+    const { userId, pageSize = 10, page = 1, searchQuery } = params;
+
+    const user = await User.findOne({ clerkId: userId });
+
+    if (!user) {
+      throwError("User not found");
+    }
+
+    const skipAmount = (page - 1) * pageSize;
+    // find the user interaction
+    const interaction = await Interaction.find({
+      user: user._id,
+    })
+      .populate("tags")
+      .exec();
+
+    //   extract the tags from the interaction
+    const userTags = interaction.reduce((tags: any, interaction: any) => {
+      if (interaction.tags) {
+        tags = tags.concat(interaction.tags);
+      }
+      return tags;
+    }, []);
+
+    //   get distinct tags
+    // @ts-ignore
+    const distinctTags = [...new Set(userTags.map((tag: any) => tag._id))];
+
+    const query: FilterQuery<IQuestion> = {
+      $and: [
+        {
+          tags: { $in: distinctTags },
+        },
+        {
+          author: { $ne: user._id },
+        },
+      ],
+    };
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { content: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
+    const totalQuestions = await Question.countDocuments(query);
+
+    const recommendedQuestions = await Question.find(query)
+      .populate({ path: "tags", model: Tag })
+      .populate({ path: "author", model: User })
+      .limit(pageSize)
+      .skip(skipAmount);
+
+    const isNext = totalQuestions > skipAmount + recommendedQuestions.length;
+
+    return { questions: recommendedQuestions, isNext };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
+```
+implementation on the client side
+```tsx
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { userId } = auth();
+  let result;
+
+  if (searchParams?.filter === "recommended") {
+    if (userId) {
+      result = await getRecentQuestions({
+        userId,
+        searchQuery: searchParams.q,
+        page: searchParams.page ? +searchParams.page : 1,
+        pageSize: 10,
+      });
+    } else {
+      result = {
+        questions: [],
+        isNext: false,
+      };
+    }
+  } else {
+    result = await getQuestions({
+      searchQuery: searchParams.q,
+      filter: searchParams.filter,
+      page: searchParams.page ? +searchParams.page : 1,
+      pageSize: 10,
+    });
+  }
+```
 
 ## Next.js 13.5+ 🔲
 ### Upgrade Next.js to the latest version 🔲
