@@ -125,11 +125,10 @@
     - [Implement the Badge System ✅](#implement-the-badge-system-)
   - [Generate AI Answer 🔲](#generate-ai-answer-)
     - [Setup AI Answer feature ✅](#setup-ai-answer-feature-)
-    - [Implement the API route for the AI feature 🔲](#implement-the-api-route-for-the-ai-feature-)
-    - [Display the AI results on the UI 🔲](#display-the-ai-results-on-the-ui-)
+    - [Implement the API route for the AI feature ✅](#implement-the-api-route-for-the-ai-feature-)
+    - [Display the AI results on the UI ✅](#display-the-ai-results-on-the-ui-)
   - [Loadings \_ Toasts 🔲](#loadings-_-toasts-)
-    - [Setup AI Answer feature 🔲](#setup-ai-answer-feature--1)
-    - [Create a Loading state for the Community page 🔲](#create-a-loading-state-for-the-community-page-)
+    - [Create a Loading state for the Community page ✅](#create-a-loading-state-for-the-community-page-)
     - [Create Loading states for the rest of the pages 🔲](#create-loading-states-for-the-rest-of-the-pages-)
     - [Create toasts for a few actions 🔲](#create-toasts-for-a-few-actions-)
   - [Meta Data 🔲](#meta-data-)
@@ -11700,7 +11699,7 @@ creating the handle method
     }
   };
 ```
-### Implement the API route for the AI feature 🔲
+### Implement the API route for the AI feature ✅
 api end point chatgpt
 ```ts
 import { NextRequest, NextResponse } from "next/server";
@@ -11742,7 +11741,7 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
   }
 };
 ```
-### Display the AI results on the UI 🔲
+### Display the AI results on the UI ✅
 
 ```tsx
 
@@ -11790,8 +11789,40 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
       </div>
 ```
 ## Loadings _ Toasts 🔲
-### Setup AI Answer feature 🔲
-### Create a Loading state for the Community page 🔲
+
+### Create a Loading state for the Community page ✅
+Loading component
+
+```tsx
+import { Skeleton } from "@/components/ui/skeleton";
+
+const Loading = () => {
+  return (
+    <section>
+      <h1 className={"h1-bold text-dark100_light900"}>All Users</h1>
+      <div className="mb-12 mt-11 grid gap-5 xs:grid-cols-1 md:grid-cols-4">
+        <Skeleton
+          className={"h-14 bg-slate-900/10 dark:bg-slate-700 md:col-span-3"}
+        />
+        <Skeleton className={"h-14 bg-slate-900/10 dark:bg-slate-700"} />
+      </div>
+      <div className="grid gap-y-5 xs:grid-cols-1 xs:justify-items-start  md:grid-cols-2 2xl:grid-cols-3">
+        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+          <Skeleton
+            key={i}
+            className={
+              "h-[284px] w-[254px] rounded-2xl bg-slate-900/10 dark:bg-slate-700 "
+            }
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default Loading;
+
+```
 ### Create Loading states for the rest of the pages 🔲
 ### Create toasts for a few actions 🔲
 
